@@ -10,18 +10,18 @@ export const syncUserCreation = inngest.createFunction(
   { event: 'clerk/user.created' },
   async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
-    const email = email_addresses[0].email_address;
+    const userData = {
+      _id: id,
+      name: first_name + '' + last_name,
+      email: email_addresses[0].email_address,
+      imageUrl: image_url
+    }
     await connectDB();
 
     // давхар email check
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      await User.create({
-        clerkId: id, // _id биш, custom field
-        name: `${first_name} ${last_name}`,
-        email,
-        imageUrl: image_url
-      });
+      await User.create(userData);
     }
   }
 );
@@ -32,17 +32,16 @@ export const syncUserUpdation = inngest.createFunction(
   { event: 'clerk/user.updated' },
   async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
-    const email = email_addresses[0].email_address;
+
+    const userData = {
+      _id: id,
+      name: first_name + '' + last_name,
+      email: email_addresses[0].email_address,
+      imageUrl: image_url
+    }
     await connectDB();
 
-    await User.findOneAndUpdate(
-      { clerkId: id },
-      {
-        name: `${first_name} ${last_name}`,
-        email,
-        imageUrl: image_url
-      }
-    );
+    await User.findByIdAndUpdate(id, userData)
   }
 );
 
@@ -54,6 +53,6 @@ export const syncUserDeletion = inngest.createFunction(
     const { id } = event.data;
     await connectDB();
 
-    await User.findOneAndDelete({ clerkId: id });
+    await User.findByIdAndDelete(id);
   }
 );
