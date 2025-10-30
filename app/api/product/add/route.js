@@ -5,6 +5,7 @@ import authSeller from '@/lib/authSeller';
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import Product from '@/models/product';
+import { IMAGES_MANIFEST } from 'next/dist/shared/lib/constants';
 
 
 cloudinary.config({
@@ -64,7 +65,7 @@ export async function POST(request) {
             category,
             price:Number(price),
             offerPrice: Number(offerPrice),
-            image,
+            images: image,
             date: Date.now()
         })
 
