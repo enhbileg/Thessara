@@ -3,6 +3,8 @@ import { get } from 'mongoose';
 import { getAuth } from '@clerk/nextjs/server';
 import authSeller from '@/lib/authSeller';
 import { NextResponse } from 'next/server';
+import connectDB from '@/config/db';
+
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,15 +19,15 @@ export async function POST(request) {
         if (!isSeller) {
             return new NextResponse.json({ success: false, message: "Unauthorized Access" }), { status: 401 }
         }
-        const name = formData.get('name');
+        const name = FormData.get('name');
         const description = formData.get('description');
         const category = formData.get('category');
         const price = formData.get('price');
         const offerPrice = formData.get('offerPrice');
 
-        const file = formData.getAll('images');
+        const files = formData.getAll('images');
 
-        if (!file || file.length === 0) {
+        if (!files || files.length === 0) {
             return NextResponse.json({ success: false, message: "Please provide product images" }, { status: 400 })
         }
 
