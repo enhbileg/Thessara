@@ -68,6 +68,10 @@ export async function POST(request) {
 
 
     } catch (error) {
-        
-    }   
+        console.error('❌ Error adding product:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal server error', error: String(error) },
+      { status: 500 })
+    }
+   
 }
