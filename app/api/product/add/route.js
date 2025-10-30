@@ -4,6 +4,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import authSeller from '@/lib/authSeller';
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
+import Product from '@/models/product';
 
 
 cloudinary.config({
@@ -19,7 +20,8 @@ export async function POST(request) {
         if (!isSeller) {
             return new NextResponse.json({ success: false, message: "Unauthorized Access" }), { status: 401 }
         }
-        const name = FormData.get('name');
+        const formData = await request.formData();
+        const name = formData.get('name');
         const description = formData.get('description');
         const category = formData.get('category');
         const price = formData.get('price');
@@ -32,7 +34,7 @@ export async function POST(request) {
         }
 
         const result = await Promise.all(
-            files.map(async (file) => {
+            files.map( async (file) => {
                 const arrayBuffer = await file.arrayBuffer()
                 const buffer = Buffer.from(arrayBuffer)
 
