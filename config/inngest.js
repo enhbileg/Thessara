@@ -81,7 +81,7 @@ export const createUserOrder = inngest.createFunction(
     await connectDB()
     await Order.insertMany(orders)
 
-    return{ success: true,processed: events.length}
+    return{ success: true, processed: events.length}
 
   }
 )
