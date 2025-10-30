@@ -6,27 +6,27 @@ const HeaderSlider = () => {
   const sliderData = [
     {
       id: 1,
-      title: "Experience Pure Sound - Your Perfect Headphones Awaits!",
-      offer: "Limited Time Offer 30% Off",
-      buttonText1: "Buy now",
+      title: "Шинэ үеийн ухаалаг хэрэгслүүдийг эндээс!",
+      offer: "Thessara",
+      buttonText1: "Conruct us",
       buttonText2: "Find more",
-      imgSrc: assets.header_headphone_image,
+      imgSrc: 'https://res.cloudinary.com/dxqziib9u/image/upload/v1761835636/ar4qhh7bnyv2kzsygoxb.png',
     },
     {
       id: 2,
-      title: "Next-Level Gaming Starts Here - Discover PlayStation 5 Today!",
-      offer: "Hurry up only few lefts!",
+      title: "Шинэ загварын цагнуудыг эндээс!",
+      offer: "Цөөхөн тоогоор ирсэн шинэ коллекц",
       buttonText1: "Shop Now",
       buttonText2: "Explore Deals",
-      imgSrc: assets.header_playstation_image,
+      imgSrc: 'https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/ohy6qzqyydkmwc4gnufc.png',
     },
     {
       id: 3,
-      title: "Power Meets Elegance - Apple MacBook Pro is Here for you!",
-      offer: "Exclusive Deal 40% Off",
+      title: "Шинэ загварын цагнуудыг эндээс!",
+      offer: "Цөөхөн тоогоор ирсэн шинэ коллекц",
       buttonText1: "Order Now",
       buttonText2: "Learn More",
-      imgSrc: assets.header_macbook_image,
+      imgSrc: 'https://res.cloudinary.com/dxqziib9u/image/upload/v1761835686/dwq77hvajopzujp8qybo.png',
     },
   ];
 
