@@ -68,7 +68,7 @@ const ProductList = () => {
                       <div className="bg-gray-500/10 rounded p-2">
                         <Image
                           alt={product.name}
-                          src={product.images[0]}
+                          src={product.image[0]}
                           className="w-16"
                           width={1280}
                           height={720}
@@ -79,7 +79,7 @@ const ProductList = () => {
                     <td className="px-4 py-3 max-sm:hidden">
                       {product.category}
                     </td>
-                    <td className="px-4 py-3">${product.offerPrice}</td>
+                    <td className="px-4 py-3">₮{product.offerPrice}</td>
                     <td className="px-4 py-3 max-sm:hidden">
                       <button
                         onClick={() => router.push(`/product/${product._id}`)}

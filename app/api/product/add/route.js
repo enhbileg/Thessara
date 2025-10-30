@@ -65,7 +65,7 @@ export async function POST(request) {
             category,
             price:Number(price),
             offerPrice: Number(offerPrice),
-            images: image,
+            image,
             date: Date.now()
         })
 
