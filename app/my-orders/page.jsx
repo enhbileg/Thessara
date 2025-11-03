@@ -80,7 +80,7 @@ fetchOrders();
                                     <p className="flex flex-col">
                                         <span>Method : COD</span>
                                         <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                        <span>Payment : {order.status}</span>
+                                        <span>Payment : {Order.status}</span>
                                     </p>
                                 </div>
                             </div>
