@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
 import toast from "react-hot-toast";
 import axios from "axios";
+import Order from "@/models/Order";
 
 const MyOrders = () => {
 
@@ -79,7 +80,7 @@ fetchOrders();
                                     <p className="flex flex-col">
                                         <span>Method : COD</span>
                                         <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                        <span>Payment : Pending</span>
+                                        <span>Payment : {order.status}</span>
                                     </p>
                                 </div>
                             </div>
