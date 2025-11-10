@@ -1,4 +1,5 @@
-import logo from "./logo.png";
+import lightLogo from "./logo.png";
+import darkLogo from "./logoDark.png";
 import search_icon from "./search_icon.svg";
 import user_icon from "./user_icon.svg";
 import cart_icon from "./cart_icon.svg";
@@ -48,7 +49,7 @@ import product_details_page_apple_earphone_image4 from "./product_details_page_a
 import product_details_page_apple_earphone_image5 from "./product_details_page_apple_earphone_image5.png";
 
 export const assets = {
-  logo,
+  lightLogo, darkLogo,
   search_icon,
   user_icon,
   cart_icon,
@@ -97,7 +98,13 @@ export const assets = {
   product_details_page_apple_earphone_image5,
   checkmark
 };
-
+export const DarkModeIcon = () => {
+  return (
+    <svg className="w-5 h-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 3v1.5M6.364 5.636l1.061 1.061M3 12h1.5m2.864 6.364 1.061-1.061M12 19.5V21m5.636-2.136-1.061-1.061M19.5 12H21m-2.136-5.636-1.061 1.061M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
+    </svg>
+  )
+}
 export const BagIcon = () => {
   return (
     <svg className="w-5 h-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

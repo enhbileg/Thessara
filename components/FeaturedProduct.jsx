@@ -5,21 +5,21 @@ import Image from "next/image";
 const products = [
   {
     id: 1,
-    image: assets.girl_with_headphone_image,
-    title: "Unparalleled Sound",
-    description: "Experience crystal-clear audio with premium headphones.",
+    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/ohy6qzqyydkmwc4gnufc.png",
+    title: "Thessara",
+    description: "Experience crystal-clear.",
   },
   {
     id: 2,
-    image: assets.girl_with_earphone_image,
-    title: "Stay Connected",
-    description: "Compact and stylish earphones for every occasion.",
+    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835641/wxkrmdq2a1yrw2qz5afg.png",
+    title: "Deluxe edition",
+    description: "comfort.",
   },
   {
     id: 3,
-    image: assets.boy_with_laptop_image,
-    title: "Power in Every Pixel",
-    description: "Shop the latest laptops for work, gaming, and more.",
+    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/qtjhtgvw1zll5o9xve5c.png",
+    title: "Power of watch",
+    description: "Shop the latest watch and more.",
   },
 ];
 
@@ -34,7 +34,7 @@ const FeaturedProduct = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-14 mt-12 md:px-14 px-4">
         {products.map(({ id, image, title, description }) => (
           <div key={id} className="relative group">
-            <Image
+            <Image width={1080} height={1350}
               src={image}
               alt={title}
               className="group-hover:brightness-75 transition duration-300 w-full h-auto object-cover"

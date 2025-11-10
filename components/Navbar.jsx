@@ -1,24 +1,45 @@
 "use client"
 import React from "react";
-import { assets, BagIcon, BoxIcon, CartIcon, HomeIcon } from "@/assets/assets";
+import { useState, useEffect } from "react";
+import { assets, BagIcon, BoxIcon, CartIcon, DarkModeIcon, HomeIcon } from "@/assets/assets";
 import Link from "next/link"
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
-
+import { useTheme } from "@/context/appTheme";
 const Navbar = () => {
 
   const { isSeller, router, user } = useAppContext();
   const { openSignIn } = useClerk();
+   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // SSR үед logo алдаа гаргахгүйн тулд
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null; // сервер дээр theme х
 
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700">
-      <Image
-        className="cursor-pointer w-28 md:w-32"
-        onClick={() => router.push('/')}
-        src={assets.logo}
-        alt="logo"
-      />
+    <nav className=" flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b bg-navbar text-navbar border-navbar">
+      <div className="flex items-center gap-2">
+          {theme === "dark" ? (
+            <Image 
+              src={assets.darkLogo} 
+              alt="Dark logo" 
+              width={120} 
+              height={40} 
+              className="transition-all duration-300"
+            />
+          ) : (
+            <Image 
+              src={assets.lightLogo} 
+              alt="Light logo" 
+              width={120} 
+              height={40} 
+              className="transition-all duration-300"
+            />
+          )}
+        </div>
       <div className="flex items-center gap-4 lg:gap-8 max-md:hidden">
         <Link href="/" className="hover:text-gray-900 transition">
           Home
@@ -48,6 +69,11 @@ const Navbar = () => {
           </UserButton.MenuItems>
           <UserButton.MenuItems>
             <UserButton.Action label="My orders" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
+          </UserButton.MenuItems>
+          <UserButton.MenuItems>
+            <UserButton.Action label="Dark/Light mode" labelIcon={<DarkModeIcon />} onClick={toggleTheme}
+         />
+      
           </UserButton.MenuItems>
         </UserButton>
         </> 

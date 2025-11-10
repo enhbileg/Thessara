@@ -1,27 +1,29 @@
+'use client'
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { AppContextProvider } from "@/context/AppContext";
 import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "@/context/appTheme";
 
-const outfit = Outfit({ subsets: ['latin'], weight: ["300", "400", "500"] })
 
-export const metadata = {
-  title: "Thessara",
-  description: "Yuu ch hamaagu oguulj bn ",
-};
+const outfit = Outfit({ subsets: ['latin'], weight: ["300", "400", "500"] });
 
 export default function RootLayout({ children }) {
+  
+
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${outfit.className} antialiased text-gray-700`} >
+        <body className={`${outfit.className} antialiased`}>
           <Toaster />
           <AppContextProvider>
+            <ThemeProvider>
             {children}
+            </ThemeProvider>
           </AppContextProvider>
         </body>
       </html>
-      </ClerkProvider>
+    </ClerkProvider>
   );
 }
