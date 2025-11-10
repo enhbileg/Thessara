@@ -101,6 +101,11 @@ const Navbar = () => {
           <UserButton.MenuItems>
             <UserButton.Action label="My orders" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
           </UserButton.MenuItems>
+          <UserButton.MenuItems>
+            <UserButton.Action label="Dark/Light mode" labelIcon={<DarkModeIcon />} onClick={toggleTheme}
+         />
+      
+          </UserButton.MenuItems>
         </UserButton>
         </> 
         : <button onClick={openSignIn} className="flex items-center gap-2 hover:text-gray-900 transition">
