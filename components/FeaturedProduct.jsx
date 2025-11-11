@@ -1,29 +1,59 @@
-import React from "react";
-import { assets } from "@/assets/assets";
+"use client";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-
-const products = [
-  {
-    id: 1,
-    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/ohy6qzqyydkmwc4gnufc.png",
-    title: "Thessara",
-    description: "Experience crystal-clear.",
-  },
-  {
-    id: 2,
-    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835641/wxkrmdq2a1yrw2qz5afg.png",
-    title: "Deluxe edition",
-    description: "comfort.",
-  },
-  {
-    id: 3,
-    image: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/qtjhtgvw1zll5o9xve5c.png",
-    title: "Power of watch",
-    description: "Shop the latest watch and more.",
-  },
-];
+import { assets } from "@/assets/assets";
 
 const FeaturedProduct = () => {
+  const [products, setProducts] = useState([]);
+  const [ratios, setRatios] = useState({}); // {_id: ratio}
+
+  // Жишээ: хэрэглэгчийн өгсөн индексүүд
+  const selectedIndexes = [0, 1, 2]; // та өөрөө хүссэн 3 тоогоо энд өгнө
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/product/list");
+        const data = await res.json();
+        if (data.success) setProducts(data.products);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Сонгосон products
+  const selectedProducts = selectedIndexes
+    .map((i) => products[i])
+    .filter(Boolean);
+
+  // Natural width/height шалгах
+  useEffect(() => {
+    if (!selectedProducts.length) return;
+    const loadRatios = async () => {
+      const entries = await Promise.all(
+        selectedProducts.map(
+          (p) =>
+            new Promise((resolve) => {
+              const img = new window.Image();
+              const src = Array.isArray(p.image) ? p.image[0] : p.image;
+              img.src = src;
+              img.onload = () => resolve([p._id, img.width / img.height]);
+              img.onerror = () => resolve([p._id, 1]); // fallback square
+            })
+        )
+      );
+      setRatios(Object.fromEntries(entries));
+    };
+    loadRatios();
+  }, [selectedProducts]);
+
+  // Landscape зураг байгаа эсэх
+  const landscapeIndex = selectedProducts.findIndex(
+    (p) => ratios[p?._id] && ratios[p._id] > 1
+  );
+
   return (
     <div className="mt-14">
       <div className="flex flex-col items-center">
@@ -31,25 +61,78 @@ const FeaturedProduct = () => {
         <div className="w-28 h-0.5 bg-button mt-2"></div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-14 mt-12 md:px-14 px-4">
-        {products.map(({ id, image, title, description }) => (
-          <div key={id} className="relative group">
-            <Image width={1080} height={1350}
-              src={image}
-              alt={title}
-              className="group-hover:brightness-75 transition duration-300 w-full h-auto object-cover"
-            />
-            <div className="group-hover:-translate-y-4 transition duration-300 absolute bottom-8 left-8 text-white space-y-2">
-              <p className="font-medium text-xl lg:text-2xl">{title}</p>
-              <p className="text-sm lg:text-base leading-5 max-w-60">
-                {description}
-              </p>
-              <button className="flex items-center gap-1.5 bg-button px-4 py-2 rounded">
-                Buy now <Image className="h-3 w-3" src={assets.redirect_icon} alt="Redirect Icon" />
-              </button>
+      <div className="mt-12 md:px-14 px-4">
+        {/* Mobile: 1-column */}
+        <div className="grid md:hidden grid-cols-1 gap-8">
+          {selectedProducts.map((p) => (
+            <Card key={p._id} product={p} />
+          ))}
+        </div>
+
+        {/* Desktop: landscape байгаа бол 1+2 layout */}
+        {landscapeIndex !== -1 ? (
+          <div className="hidden md:grid gap-8 lg:gap-14">
+            {/* Top full-width landscape */}
+            <Card product={selectedProducts[landscapeIndex]} wide />
+
+            {/* Bottom two columns */}
+            <div className="grid grid-cols-2 gap-8 lg:gap-14">
+              {selectedProducts
+                .filter((_, idx) => idx !== landscapeIndex)
+                .slice(0, 2)
+                .map((p) => (
+                  <Card key={p._id} product={p} />
+                ))}
             </div>
           </div>
-        ))}
+        ) : (
+          /* Default 3-column grid */
+          <div className="hidden md:grid grid-cols-3 gap-8 lg:gap-14">
+            {selectedProducts.map((p) => (
+              <Card key={p._id} product={p} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Card = ({ product, wide }) => {
+  const { name, offerPrice, image } = product || {};
+  const src = Array.isArray(image) ? image[0] : image;
+
+  return (
+    <div
+      className={`relative group overflow-hidden rounded-xl ${
+        wide ? "aspect-video" : "aspect-[4/5]"
+      }`}
+    >
+      <Image
+        fill
+        src={src}
+        alt={name}
+        className="object-cover transition duration-300 group-hover:brightness-75"
+      />
+
+      {/* Title */}
+      <div className="absolute left-6 text-white z-20 transition-all duration-500 bottom-10 group-hover:bottom-[20%]">
+        <p className="font-medium text-xl lg:text-2xl">{name}</p>
+      </div>
+
+      {/* Price + Button */}
+      <div className="absolute left-6 right-6 bottom-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
+        <p className="text-lg font-semibold mt-1">₮ {Number(offerPrice).toLocaleString("mn-MN")}</p>
+        <div className="mt-3">
+          <button className="flex items-center gap-1.5 bg-button px-4 py-2 rounded transition-transform duration-300 hover:scale-105">
+            Buy now
+            <Image
+              className="h-3 w-3"
+              src={assets.redirect_icon}
+              alt="Redirect Icon"
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

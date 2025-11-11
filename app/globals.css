@@ -70,3 +70,21 @@ a {
 .dark .bg-button {
   @apply bg-indigo-600 hover:bg-indigo-800 text-white;
 }
+.bg-blank {
+  @apply bg-white;
+}
+.dark .bg-blank {
+  @apply bg-slate-900;
+}
+.border-blank {
+  @apply border border-gray-400;
+}
+.dark .border-blank {
+  @apply border border-gray-700;
+}
+.bg-nbutton {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800;
+}
+.dark .bg-nbutton {
+  @apply bg-slate-700 hover:bg-slate-600 text-gray-200;
+}

@@ -91,9 +91,9 @@ const OrderSummary = () => {
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Select Address
           </label>
-          <div className="relative inline-block w-full text-sm border">
+          <div className="relative inline-block w-full text-sm border-blank">
             <button
-              className="peer w-full text-left px-4 pr-2 py-2 bg-white text-gray-700 focus:outline-none"
+              className="peer w-full text-left px-4 pr-2 py-2 bg-blank  text-gray-700 focus:outline-none"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <span>
@@ -130,7 +130,7 @@ const OrderSummary = () => {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Promo Code
           </label>
@@ -144,31 +144,31 @@ const OrderSummary = () => {
               Apply
             </button>
           </div>
-        </div>
+        </div> */}
 
         <hr className="border-gray-500/30 my-5" />
 
         <div className="space-y-4">
           <div className="flex justify-between text-base font-medium">
-            <p className="uppercase text-gray-600">Items {getCartCount()}</p>
-            <p className="text-gray-800">{currency}{getCartAmount()}</p>
+            <p className="uppercase text-gray-600">Items  {getCartCount()}</p>
+            <p className="text-gray-800">{currency}{getCartAmount().toLocaleString("mn-MN")}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Shipping Fee</p>
-            <p className="font-medium text-gray-800">Free</p>
+            <p className="font-medium text-gray-800">5,000₮</p>
           </div>
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <p className="text-gray-600">Tax (2%)</p>
-            <p className="font-medium text-gray-800">{currency}{Math.floor(getCartAmount() * 0.02)}</p>
-          </div>
+            <p className="font-medium text-gray-800">{currency}{Math.floor(getCartAmount() + 5000)}</p>
+          </div> */}
           <div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
             <p>Total</p>
-            <p>{currency}{getCartAmount() + Math.floor(getCartAmount() * 0.02)}</p>
+            <p>{currency}{Math.floor(getCartAmount() + 5000).toLocaleString("mn-MN")}</p>
           </div>
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-button text-primary">
+      <button onClick={createOrder} className="w-full bg-button text-primary rounded-full">
         Place Order
       </button>
     </div>
