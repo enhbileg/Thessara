@@ -7,6 +7,7 @@ import Loading from "@/components/Loading";
 import Footer from "@/components/seller/Footer";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { Suspense } from "react";
 
 const StatusBadge = ({ status, type }) => {
   const colors = {
@@ -33,7 +34,7 @@ const StatusBadge = ({ status, type }) => {
   );
 };
 
-const OrderDetailPage = () => {
+const OrderDetailContent = () => {
   const { getToken, user } = useAppContext();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -133,4 +134,11 @@ const OrderDetailPage = () => {
   );
 };
 
-export default OrderDetailPage;
+// ✅ Suspense wrapper
+export default function OrderDetailPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <OrderDetailContent />
+    </Suspense>
+  );
+}
