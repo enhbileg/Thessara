@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useAppContext } from "@/context/AppContext";
 import Loading from "@/components/Loading";
 import Footer from "@/components/seller/Footer";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const StatusBadge = ({ status, type }) => {
   const colors = {
@@ -31,9 +31,7 @@ const StatusBadge = ({ status, type }) => {
   );
 };
 
-const OrderDetailPage = () => {
-  const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
+const OrderDetailPage = ({ orderId }) => {
   const { getToken, user } = useAppContext();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
