@@ -10,6 +10,21 @@ const orderSchema = new mongoose.Schema({
     address : { type: String, ref: 'address', required: true },
     status : { type: String, required: true, default: 'Order Placed' },
     date : { type: Number, required: true },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+      required: true,
+    },
+
+    // ✅ Delivery status
+    deliveryStatus: {
+      type: String,
+      enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
+      default: "Pending",
+      required: true,
+    },
+  
 })
 
 const Order = mongoose.models.order || mongoose.model('order', orderSchema)

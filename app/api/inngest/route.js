@@ -7,7 +7,8 @@ import {
   syncUserUpdation,
   onPaymentDone,
   onOrderShipped,
-  onOrderDelivered
+  onOrderDelivered,
+  productUpdate
 } from "@/config/inngest";
 
 // Inngest API route
@@ -23,6 +24,9 @@ export const { GET, POST, PUT } = serve({
     createUserOrder,
     onPaymentDone,
     onOrderShipped,
-    onOrderDelivered
+    onOrderDelivered,
+
+    // ✅ Product events
+    productUpdate
   ],
 });

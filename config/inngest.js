@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 import connectDB from "./db";
 import User from "@/models/User";
 import Order from "@/models/Order";
+import Product from "@/models/product";
 
 export const inngest = new Inngest({ id: "Thessara" })
 
@@ -115,5 +116,23 @@ export const onOrderDelivered = inngest.createFunction(
     console.log("✅ Order delivered:", event.data.orderId);
     // Customer notification logic энд
     return { ok: true };
+  }
+);
+// барааний шинэчлэлт
+export const productUpdate = inngest.createFunction(
+  { id: "product-update" },
+  { event: "product/update" },
+  async ({ event }) => {
+    const { id, name, description, category, price, offerPrice, stock } = event.data;
+
+    await connectDB();
+    const updated = await Product.findByIdAndUpdate(
+      id,
+      { name, description, category, price, offerPrice, stock },
+      { new: true }
+    );
+    
+
+    return { success: true, updated };
   }
 );

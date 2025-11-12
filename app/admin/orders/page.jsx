@@ -69,13 +69,15 @@ const OrdersPage = () => {
   };
 
   const goToDetail = (id) => {
-    router.push(`/admin/orders/detail?orderId=${id}`);
+    router.push(`/admin/orders/detail?id=${id}`);
   };
 
   useEffect(() => {
     if (user) fetchOrders();
   }, [user]);
 
+  // ✅ Group orders
+  const placedOrders = orders.filter((o) => o.status === "Order Placed");
   const paymentPending = orders.filter((o) => o.paymentStatus === "Pending");
   const paidOrders = orders.filter(
     (o) => o.paymentStatus === "Paid" && o.deliveryStatus === "Pending"
@@ -84,15 +86,18 @@ const OrdersPage = () => {
   const deliveredOrders = orders.filter((o) => o.deliveryStatus === "Delivered");
 
   const StatusBadge = ({ order }) => {
-    let color = "bg-gray-100 text-gray-700";
+    let color = "bg-gray-100 text-primary";
     let text = order.deliveryStatus;
-    if (order.paymentStatus === "Pending") {
-      color = "bg-yellow-100 text-yellow-700";
+    if (order.status === "Order Placed") {
+      color = "bg-purple-100 text-primary";
+      text = "Order Placed";
+    } else if (order.paymentStatus === "Pending") {
+      color = "bg-yellow-100 text-primary";
       text = "Payment Pending";
     } else if (order.deliveryStatus === "Shipped") {
-      color = "bg-blue-100 text-blue-700";
+      color = "bg-blue-100 text-primary";
     } else if (order.deliveryStatus === "Delivered") {
-      color = "bg-green-100 text-green-700";
+      color = "bg-green-100 text-primary";
     }
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${color}`}>
@@ -103,11 +108,11 @@ const OrdersPage = () => {
 
   const Section = ({ title, list, renderActions }) => (
     <div className="mb-8">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
-      <div className="overflow-hidden rounded-lg bg-white shadow-md">
+      <h3 className="text-xl font-semibold text-primary mb-4">{title}</h3>
+      <div className="overflow-hidden rounded-lg bg-backBanner shadow-md transition-colors duration-300">
         {/* Desktop table */}
         <table className="hidden md:table table-fixed w-full">
-          <thead className="bg-gray-100 text-gray-900 text-sm">
+          <thead className="bg-backBanner text-primary text-sm">
             <tr>
               <th className="px-4 py-3 font-medium">Order ID</th>
               <th className="px-4 py-3 font-medium">Amount</th>
@@ -116,12 +121,12 @@ const OrdersPage = () => {
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-sm text-gray-700">
+          <tbody className="text-sm text-primary">
             {list.map((order) => (
               <tr
                 key={order._id}
                 onClick={() => goToDetail(order._id)}
-                className="border-t border-gray-200 hover:bg-gray-50 cursor-pointer"
+                className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
               >
                 <td className="px-4 py-3">{order._id}</td>
                 <td className="px-4 py-3 text-orange-600 font-semibold">
@@ -154,13 +159,12 @@ const OrdersPage = () => {
             <div
               key={order._id}
               onClick={() => goToDetail(order._id)}
-              className="bg-white rounded-lg shadow-md p-4 mb-3 relative cursor-pointer"
+              className="bg-backBanner rounded-lg shadow-md p-4 mb-3 relative cursor-pointer transition-colors duration-300"
             >
-              {/* Status badge top-right */}
               <div className="absolute top-2 right-2">
                 <StatusBadge order={order} />
               </div>
-              <p className="font-semibold text-gray-800">
+              <p className="font-semibold text-primary">
                 Order ID: {order._id}
               </p>
               <p className="text-orange-600 font-bold">₮{order.amount}</p>
@@ -170,75 +174,90 @@ const OrdersPage = () => {
       </div>
     </div>
   );
+return (
+  <div className="flex-1 min-h-screen flex flex-col justify-between bg-primary">
+    {loading ? (
+      <Loading />
+    ) : (
+      <div className="w-full md:p-10 p-4">
+        <h2 className="pb-6 text-2xl font-bold text-primary">Orders</h2>
 
-  return (
-    <div className="flex-1 min-h-screen flex flex-col justify-between bg-gray-50">
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="w-full md:p-10 p-4">
-          <h2 className="pb-6 text-2xl font-bold text-gray-800">Orders</h2>
+        <Section
+          title="📝 Order Placed"
+          list={placedOrders}
+          renderActions={(o) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                updateOrder(o._id, { paymentStatus: "Paid" });
+              }}
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            >
+              Mark as Paid
+            </button>
+          )}
+        />
 
-          <Section
-            title="💳 Payment Pending"
-            list={paymentPending}
-            renderActions={(o) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateOrder(o._id, { paymentStatus: "Paid" });
-                }}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              >
-                Mark as Paid
-              </button>
-            )}
-          />
+        <Section
+          title="💳 Payment Pending"
+          list={paymentPending}
+          renderActions={(o) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                updateOrder(o._id, { paymentStatus: "Paid" });
+              }}
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            >
+              Mark as Paid
+            </button>
+          )}
+        />
 
-          <Section
-            title="✅ Paid Orders"
-            list={paidOrders}
-            renderActions={(o) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateOrder(o._id, { deliveryStatus: "Shipped" });
-                }}
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              >
-                Ship Order
-              </button>
-            )}
-          />
+        <Section
+          title="✅ Paid Orders"
+          list={paidOrders}
+          renderActions={(o) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                updateOrder(o._id, { deliveryStatus: "Shipped" });
+              }}
+              className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Ship Order
+            </button>
+          )}
+        />
 
-          <Section
-            title="📦 Shipped Orders"
-            list={shippedOrders}
-            renderActions={(o) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateOrder(o._id, { deliveryStatus: "Delivered" });
-                }}
-                className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition"
-              >
-                Mark as Delivered
-              </button>
-            )}
-          />
+        <Section
+          title="📦 Shipped Orders"
+          list={shippedOrders}
+          renderActions={(o) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                updateOrder(o._id, { deliveryStatus: "Delivered" });
+              }}
+              className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition"
+            >
+              Mark as Delivered
+            </button>
+          )}
+        />
 
-          <Section
-            title="🎉 Delivered Orders"
-            list={deliveredOrders}
-            renderActions={() => (
-              <span className="text-green-600 font-medium">Completed</span>
-            )}
-          />
-        </div>
-      )}
-      <Footer />
-    </div>
-  );
+        <Section
+          title="🎉 Delivered Orders"
+          list={deliveredOrders}
+          renderActions={() => (
+            <span className="text-green-600 font-medium">Completed</span>
+          )}
+        />
+      </div>
+    )}
+    <Footer />
+  </div>
+);
 };
 
 export default OrdersPage;

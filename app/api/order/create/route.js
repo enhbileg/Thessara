@@ -3,7 +3,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import Product from "@/models/product";
 import { inngest } from "@/config/inngest";
 import User from "@/models/User";
-import mongoose from "mongoose";
+
 
 
 export async function POST(request) {

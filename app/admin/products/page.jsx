@@ -32,8 +32,9 @@ const ProductList = () => {
   const deleteProduct = async (id) => {
     try {
       const token = await getToken();
-      const { data } = await axios.delete(`/api/product/${id}`, {
+      const { data } = await axios.delete("/api/product/delete", {
         headers: { Authorization: `Bearer ${token}` },
+        data: { id },
       });
       if (data.success) {
         toast.success(data.message);
@@ -51,13 +52,13 @@ const ProductList = () => {
   }, [user]);
 
   return (
-    <div className="flex-1 min-h-screen flex flex-col justify-between bg-gray-50">
+    <div className="flex-1 min-h-screen flex flex-col justify-between bg-primary transition-colors duration-300">
       {loading ? (
         <Loading />
       ) : (
         <div className="w-full md:p-10 p-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">My Products</h2>
+            <h2 className="text-2xl font-bold text-primary">My Products</h2>
             <button
               onClick={() => router.push("/admin/products/add")}
               className="px-4 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 transition"
@@ -66,54 +67,54 @@ const ProductList = () => {
             </button>
           </div>
 
-          {/* ✅ Responsive Card Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* ✅ Card Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {products.map((product) => (
               <div
                 key={product._id}
-                className="bg-white rounded-lg shadow-md hover:shadow-xl transition"
+                className="bg-backBanner rounded-lg shadow-md hover:shadow-xl transition flex flex-col"
               >
                 {/* Image */}
                 <div className="overflow-hidden rounded-t-lg">
                   <Image
                     src={product.image[0]}
                     alt={product.name}
-                    width={400}
-                    height={300}
-                    className="w-full h-48 object-cover transform hover:scale-105 transition"
+                    width={200}
+                    height={150}
+                    className="w-full h-28 object-cover transform hover:scale-105 transition"
                   />
                 </div>
 
                 {/* Info */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold truncate">
+                <div className="p-2 flex-1">
+                  <h3 className="text-sm font-semibold truncate text-primary">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-500">{product.category}</p>
-                  <p className="text-orange-600 font-bold mt-2">
+                  <p className="text-xs text-primary">{product.category}</p>
+                  <p className="text-orange-600 font-bold mt-1 text-sm">
                     ₮{product.offerPrice}
                   </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-2 p-4 border-t">
+                <div className="flex flex-col gap-1 p-2 border-t border-navbar">
                   <button
                     onClick={() =>
-                      router.push(`/admin/products/${product._id}/edit`)
+                      router.push(`/admin/products/edit?id=${product._id}`)
                     }
-                    className="flex-1 px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+                    className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-xs"
                   >
                     ✏️ Edit
                   </button>
                   <button
                     onClick={() => deleteProduct(product._id)}
-                    className="flex-1 px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs"
                   >
                     🗑️ Delete
                   </button>
                   <button
-                    onClick={() => router.push(`/product/${product._id}`)}
-                    className="flex-1 px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition"
+                    onClick={() => router.push(`/product/detail?id=${product._id}`)}
+                    className="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition text-xs"
                   >
                     👁️ View
                   </button>

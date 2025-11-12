@@ -1,47 +1,81 @@
+import { getAuth } from "@clerk/nextjs/server";
 import connectDB from "@/config/db";
 import Order from "@/models/Order";
+import Address from "@/models/address";
+import Product from "@/models/product"; // ✅ Product model import
 import { NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
 import authSeller from "@/lib/authSeller";
 
-export async function POST(req) {
+export async function GET(req) {
   try {
-    // ✅ Clerk authentication
     const { userId } = getAuth(req);
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    // ✅ Seller role шалгах
     const isSeller = await authSeller(userId);
     if (!isSeller) {
-      return NextResponse.json({ success: false, message: "Forbidden: Only sellers allowed" }, { status: 403 });
+      return NextResponse.json(
+        { success: false, message: "Forbidden: Only sellers allowed" },
+        { status: 403 }
+      );
     }
 
     await connectDB();
-    const { id } = await req.json();
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ success: false, message: "Order ID required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Order ID is required" },
+        { status: 400 }
+      );
     }
 
-    // ✅ Order + Items + Address populate
-    const order = await Order.findById(id)
-      .populate("items.product")
-      .populate("address");
-
+    let order = await Order.findById(id);
     if (!order) {
-      return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Order not found" },
+        { status: 404 }
+      );
     }
 
-    // ✅ createdAt зөв харагдах
-    const formattedOrder = {
-      ...order.toObject(),
-      createdAt: order.createdAt ? order.createdAt.toISOString() : null,
-    };
+    // ✅ Address lookup
+    if (order.address) {
+      const addr = await Address.findById(order.address);
+      if (addr) {
+        order = order.toObject();
+        order.address = addr;
+      }
+    }
 
-    return NextResponse.json({ success: true, order: formattedOrder });
+    // ✅ Product lookup for each item
+    if (order.items && order.items.length > 0) {
+      const itemsWithProduct = await Promise.all(
+        order.items.map(async (item) => {
+          const prod = await Product.findById(item.product);
+          return {
+            ...item,
+            productName: prod ? prod.name : "Unknown",
+            productImage: prod ? prod.image[0] : null,
+            productPrice: prod ? prod.price : null,
+            productOfferPrice: prod ? prod.offerPrice : null,
+          };
+        })
+      );
+      order.items = itemsWithProduct;
+    }
+
+    return NextResponse.json({ success: true, order }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    console.error("Order detail error:", error);
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }
