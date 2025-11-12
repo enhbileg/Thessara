@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { assets, BagIcon, CartIcon, DarkModeIcon } from "@/assets/assets";
+import { assets, BagIcon, CartIcon, DarkModeIcon, DashboardIcon } from "@/assets/assets";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
@@ -71,7 +71,13 @@ const Navbar = () => {
                 onClick={() => router.push("/my-orders")}
               />
               {/* Theme toggle-г Clerk menu дотор давхар үлдээхийг хүсвэл энд үлдээж болно */}
+              <UserButton.Action
+                label="Admin"
+                labelIcon={< DashboardIcon/>}
+                onClick={() => router.push("/admin")}
+              />
             </UserButton.MenuItems>
+            
           </UserButton>
         ) : (
           <button
