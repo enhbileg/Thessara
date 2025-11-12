@@ -167,10 +167,10 @@ const OrderSummary = () => {
           </div>
         </div>
       </div>
-
-      <button onClick={createOrder} className="w-full bg-button text-primary rounded-full">
+<div className="pt-10">
+      <button onClick={createOrder} className="w-full pt-2 pb-2 bg-button text-primary rounded-full">
         Place Order
-      </button>
+      </button></div>
     </div>
   );
 };
