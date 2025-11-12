@@ -71,11 +71,13 @@ const Navbar = () => {
                 onClick={() => router.push("/my-orders")}
               />
               {/* Theme toggle-г Clerk menu дотор давхар үлдээхийг хүсвэл энд үлдээж болно */}
+              {isSeller && (
               <UserButton.Action
                 label="Admin"
                 labelIcon={< DashboardIcon/>}
                 onClick={() => router.push("/admin")}
               />
+              )}
             </UserButton.MenuItems>
             
           </UserButton>

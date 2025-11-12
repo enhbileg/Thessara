@@ -15,6 +15,7 @@ const AddProduct = () => {
   const [category, setCategory] = useState("Earphone");
   const [price, setPrice] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
+  const [stock, setStock] = useState(""); // ✅ stock state нэмсэн
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ const AddProduct = () => {
     formData.append("category", category);
     formData.append("price", price);
     formData.append("offerPrice", offerPrice);
+    formData.append("stock", stock); // ✅ stock formData руу нэмсэн
 
     for (let i = 0; i < files.length; i++) {
       formData.append("images", files[i]);
@@ -44,6 +46,7 @@ const AddProduct = () => {
         setCategory("Earphone");
         setPrice("");
         setOfferPrice("");
+        setStock(""); // ✅ reset stock
       } else {
         toast.error(data.message);
       }
@@ -128,8 +131,8 @@ const AddProduct = () => {
           ></textarea>
         </div>
 
-        {/* Category, Price, Offer Price */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Category, Price, Offer Price, Stock */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-base font-medium" htmlFor="category">
               Category
@@ -149,6 +152,7 @@ const AddProduct = () => {
               <option value="Accessories">Accessories</option>
             </select>
           </div>
+
           <div className="flex flex-col gap-1">
             <label className="text-base font-medium" htmlFor="product-price">
               Product Price
@@ -163,6 +167,7 @@ const AddProduct = () => {
               required
             />
           </div>
+
           <div className="flex flex-col gap-1">
             <label className="text-base font-medium" htmlFor="offer-price">
               Offer Price
@@ -174,6 +179,22 @@ const AddProduct = () => {
               className="outline-none py-2 px-3 rounded border border-gray-300 focus:ring-2 focus:ring-orange-500"
               onChange={(e) => setOfferPrice(e.target.value)}
               value={offerPrice}
+              required
+            />
+          </div>
+
+          {/* ✅ Stock */}
+          <div className="flex flex-col gap-1">
+            <label className="text-base font-medium" htmlFor="stock">
+              Stock
+            </label>
+            <input
+              id="stock"
+              type="number"
+              placeholder="0"
+              className="outline-none py-2 px-3 rounded border border-gray-300 focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setStock(e.target.value)}
+              value={stock}
               required
             />
           </div>

@@ -14,10 +14,6 @@ const EditProductContent = () => {
   const id = searchParams.get("id");
   const [loading, setLoading] = useState(true);
 
-  // хуучин мэдээлэл тусдаа хадгална
-  const [oldProduct, setOldProduct] = useState(null);
-
-  // шинэ мэдээлэл form state
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -37,7 +33,6 @@ const EditProductContent = () => {
       const product = data.products.find((p) => p._id === id);
       if (!product) return toast.error("Product not found");
 
-      setOldProduct(product); // хуучин мэдээлэл
       setForm({
         name: product.name,
         description: product.description,
@@ -85,63 +80,50 @@ const EditProductContent = () => {
     <div className="flex flex-col items-center min-h-screen bg-primary p-6">
       <h2 className="text-2xl font-bold text-primary mb-6">✏️ Edit Product</h2>
 
+      {/* ✅ Form голд байрлана */}
       <form
         onSubmit={updateProduct}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl"
+        className="w-full max-w-2xl mx-auto space-y-4 bg-backBanner p-6 rounded-lg shadow-md"
       >
-        {/* Зүүн тал: хуучин мэдээлэл */}
-        <div className="bg-backBanner p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-primary mb-4">Before Info</h3>
-          <p>Name: {oldProduct?.name}</p>
-          <p>Description: {oldProduct?.description}</p>
-          <p>Category: {oldProduct?.category}</p>
-          <p>Price: ₮{oldProduct?.price}</p>
-          <p>Offer Price: ₮{oldProduct?.offerPrice}</p>
-          <p>Stock: {oldProduct?.stock}</p>
-        </div>
+        <h3 className="text-lg font-semibold text-primary mb-4">Update Info</h3>
 
-        {/* Баруун тал: шинэ мэдээлэл */}
-        <div className="bg-backBanner p-6 rounded-lg shadow-md space-y-4">
-          <h3 className="text-lg font-semibold text-primary mb-4">Update Info</h3>
-
-          {["name", "description", "category", "price", "offerPrice", "stock"].map((field) => (
-            <div key={field} className="flex flex-col gap-1">
-              <label className="text-base font-medium capitalize">{field}</label>
-              {field === "description" ? (
-                <textarea
-                  rows={3}
-                  value={form[field]}
-                  onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                  className="outline-none py-2 px-3 rounded border border-gray-500/40 resize-none"
-                />
-              ) : field === "category" ? (
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="outline-none py-2 px-3 rounded border border-gray-500/40"
-                >
-                  <option value="Earphone">Earphone</option>
-                  <option value="Headphone">Headphone</option>
-                  <option value="Watch">Watch</option>
-                  <option value="Smartphone">Smartphone</option>
-                  <option value="Laptop">Laptop</option>
-                  <option value="Camera">Camera</option>
-                  <option value="Accessories">Accessories</option>
-                </select>
-              ) : (
-                <input
-                  type={["price", "offerPrice", "stock"].includes(field) ? "number" : "text"}
-                  value={form[field]}
-                  onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                  className="outline-none py-2 px-3 rounded border border-gray-500/40"
-                />
-              )}
-            </div>
-          ))}
-        </div>
+        {["name", "description", "category", "price", "offerPrice", "stock"].map((field) => (
+          <div key={field} className="flex flex-col gap-1">
+            <label className="text-base font-medium capitalize">{field}</label>
+            {field === "description" ? (
+              <textarea
+                rows={3}
+                value={form[field]}
+                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                className="outline-none py-2 px-3 rounded border bg-backBanner border-gray-500/40 resize-none"
+              />
+            ) : field === "category" ? (
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="outline-none py-2 px-3 rounded border bg-backBanner border-gray-500/40"
+              >
+                <option value="Earphone">Earphone</option>
+                <option value="Headphone">Headphone</option>
+                <option value="Watch">Watch</option>
+                <option value="Smartphone">Smartphone</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Camera">Camera</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            ) : (
+              <input
+                type={["price", "offerPrice", "stock"].includes(field) ? "number" : "text"}
+                value={form[field]}
+                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                className="outline-none py-2 px-3 bg-backBanner rounded border border-gray-500/40"
+              />
+            )}
+          </div>
+        ))}
 
         {/* Save Changes button center */}
-        <div className="col-span-2 flex justify-center mt-6">
+        <div className="flex justify-center mt-6">
           <button
             type="submit"
             className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 transition"

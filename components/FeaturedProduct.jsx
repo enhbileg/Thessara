@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
+import { useRouter } from "next/navigation";
 
 const FeaturedProduct = () => {
   const [products, setProducts] = useState([]);
   const [ratios, setRatios] = useState({}); // {_id: ratio}
 
-  // Жишээ: хэрэглэгчийн өгсөн индексүүд
-  const selectedIndexes = [0, 1, 2]; // та өөрөө хүссэн 3 тоогоо энд өгнө
+  const selectedIndexes = [0, 1, 2]; // жишээ сонгосон индексүүд
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -23,12 +23,10 @@ const FeaturedProduct = () => {
     fetchProducts();
   }, []);
 
-  // Сонгосон products
   const selectedProducts = selectedIndexes
     .map((i) => products[i])
     .filter(Boolean);
 
-  // Natural width/height шалгах
   useEffect(() => {
     if (!selectedProducts.length) return;
     const loadRatios = async () => {
@@ -40,7 +38,7 @@ const FeaturedProduct = () => {
               const src = Array.isArray(p.image) ? p.image[0] : p.image;
               img.src = src;
               img.onload = () => resolve([p._id, img.width / img.height]);
-              img.onerror = () => resolve([p._id, 1]); // fallback square
+              img.onerror = () => resolve([p._id, 1]);
             })
         )
       );
@@ -49,7 +47,6 @@ const FeaturedProduct = () => {
     loadRatios();
   }, [selectedProducts]);
 
-  // Landscape зураг байгаа эсэх
   const landscapeIndex = selectedProducts.findIndex(
     (p) => ratios[p?._id] && ratios[p._id] > 1
   );
@@ -62,20 +59,17 @@ const FeaturedProduct = () => {
       </div>
 
       <div className="mt-12 md:px-14 px-4">
-        {/* Mobile: 1-column */}
+        {/* Mobile */}
         <div className="grid md:hidden grid-cols-1 gap-8">
           {selectedProducts.map((p) => (
-            <Card key={p._id} product={p} />
+            <Card key={p._id} product={p} mobile />
           ))}
         </div>
 
-        {/* Desktop: landscape байгаа бол 1+2 layout */}
+        {/* Desktop */}
         {landscapeIndex !== -1 ? (
           <div className="hidden md:grid gap-8 lg:gap-14">
-            {/* Top full-width landscape */}
             <Card product={selectedProducts[landscapeIndex]} wide />
-
-            {/* Bottom two columns */}
             <div className="grid grid-cols-2 gap-8 lg:gap-14">
               {selectedProducts
                 .filter((_, idx) => idx !== landscapeIndex)
@@ -86,7 +80,6 @@ const FeaturedProduct = () => {
             </div>
           </div>
         ) : (
-          /* Default 3-column grid */
           <div className="hidden md:grid grid-cols-3 gap-8 lg:gap-14">
             {selectedProducts.map((p) => (
               <Card key={p._id} product={p} />
@@ -98,16 +91,22 @@ const FeaturedProduct = () => {
   );
 };
 
-const Card = ({ product, wide }) => {
-  const { name, offerPrice, image } = product || {};
+const Card = ({ product, wide, mobile }) => {
+  const { _id, name, offerPrice, image } = product || {};
   const src = Array.isArray(image) ? image[0] : image;
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div
       className={`relative group overflow-hidden rounded-xl ${
         wide ? "aspect-video" : "aspect-[4/5]"
       }`}
+      onClick={() => {
+        if (mobile) setOpen((prev) => !prev);
+      }}
     >
+      {/* Зураг */}
       <Image
         fill
         src={src}
@@ -115,16 +114,35 @@ const Card = ({ product, wide }) => {
         className="object-cover transition duration-300 group-hover:brightness-75"
       />
 
+      {/* Доороос нь gradient overlay */}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent z-10"></div>
+
       {/* Title */}
-      <div className="absolute left-6 text-white z-20 transition-all duration-500 bottom-10 group-hover:bottom-[20%]">
+      <div
+        className={`absolute left-6 text-white z-20 transition-all duration-500 
+          ${mobile ? (open ? "bottom-[40%]" : "bottom-10") : "bottom-10 group-hover:bottom-[20%]"}
+        `}
+      >
         <p className="font-medium text-xl lg:text-2xl">{name}</p>
       </div>
 
       {/* Price + Button */}
-      <div className="absolute left-6 right-6 bottom-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
-        <p className="text-lg font-semibold mt-1">₮ {Number(offerPrice).toLocaleString("mn-MN")}</p>
+      <div
+        className={`absolute left-6 right-6 bottom-10 text-white transition-all duration-500 z-20
+          ${mobile ? (open ? "opacity-100" : "opacity-0") : "opacity-0 group-hover:opacity-100"}
+        `}
+      >
+        <p className="text-lg font-semibold mt-1">
+          ₮ {Number(offerPrice).toLocaleString("mn-MN")}
+        </p>
         <div className="mt-3">
-          <button className="flex items-center gap-1.5 bg-button px-4 py-2 rounded transition-transform duration-300 hover:scale-105">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/product/${_id}`); // ✅ тухайн product detail page руу орно
+            }}
+            className="flex items-center gap-1.5 bg-button px-4 py-2 rounded transition-transform duration-300 hover:scale-105"
+          >
             Buy now
             <Image
               className="h-3 w-3"

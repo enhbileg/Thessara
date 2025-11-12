@@ -109,7 +109,7 @@ const OrderSummary = () => {
             </button>
 
             {isDropdownOpen && (
-              <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5">
+              <ul className="absolute w-full bg-backBanner shadow-md mt-1 z-10 py-1.5">
                 {userAddresses.map((address, index) => (
                   <li
                     key={index}

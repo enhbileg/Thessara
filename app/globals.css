@@ -102,7 +102,12 @@ a {
 .dark .bg-nbutton {
   @apply bg-slate-700 hover:bg-slate-600 text-gray-200;
 }
-
+.border-primary {
+  @apply border-violet-500;
+}
+.dark .border-primary {
+  @apply border-violet-900;
+}
 
 
 

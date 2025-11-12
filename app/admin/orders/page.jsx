@@ -77,13 +77,29 @@ const OrdersPage = () => {
   }, [user]);
 
   // ✅ Group orders
-  const placedOrders = orders.filter((o) => o.status === "Order Placed");
-  const paymentPending = orders.filter((o) => o.paymentStatus === "Pending");
-  const paidOrders = orders.filter(
-    (o) => o.paymentStatus === "Paid" && o.deliveryStatus === "Pending"
-  );
-  const shippedOrders = orders.filter((o) => o.deliveryStatus === "Shipped");
-  const deliveredOrders = orders.filter((o) => o.deliveryStatus === "Delivered");
+  // 📝 Order placed (not yet paid)
+const placedOrders = orders.filter(
+  (o) => o.status === "Order Placed" && o.paymentStatus === "Pending"
+);
+
+// 💳 Payment pending (explicitly pending)
+const paymentPending = orders.filter((o) => o.paymentStatus === "Pending");
+
+// ✅ Paid orders (paid but not shipped yet)
+const paidOrders = orders.filter(
+  (o) => o.paymentStatus === "Paid" && o.deliveryStatus === "Pending"
+);
+
+// 📦 Shipped orders (paid + shipped, not yet delivered)
+const shippedOrders = orders.filter(
+  (o) => o.paymentStatus === "Paid" && o.deliveryStatus === "Shipped"
+);
+
+// 🎉 Delivered orders (paid + delivered)
+const deliveredOrders = orders.filter(
+  (o) => o.paymentStatus === "Paid" && o.deliveryStatus === "Delivered"
+);
+
 
   const StatusBadge = ({ order }) => {
     let color = "bg-gray-100 text-primary";

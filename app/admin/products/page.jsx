@@ -32,7 +32,7 @@ const ProductList = () => {
   const deleteProduct = async (id) => {
     try {
       const token = await getToken();
-      const { data } = await axios.delete("/api/product/delete", {
+      const { data } = await axios.delete(`/api/admin/products/delete?id=${id}`, {
         headers: { Authorization: `Bearer ${token}` },
         data: { id },
       });
@@ -94,6 +94,10 @@ const ProductList = () => {
                   <p className="text-orange-600 font-bold mt-1 text-sm">
                     ₮{product.offerPrice}
                   </p>
+                  {/* ✅ Stock info */}
+                  <p className="text-xs text-primary mt-1">
+                    Stock: {product.stock}
+                  </p>
                 </div>
 
                 {/* Actions */}
@@ -113,7 +117,7 @@ const ProductList = () => {
                     🗑️ Delete
                   </button>
                   <button
-                    onClick={() => router.push(`/product/detail?id=${product._id}`)}
+                    onClick={() => router.push(`/product/${product._id}`)}
                     className="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition text-xs"
                   >
                     👁️ View
