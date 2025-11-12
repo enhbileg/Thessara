@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-const EditProductPage = () => {
+const EditProductContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { getToken, user } = useAppContext();
@@ -153,4 +154,11 @@ const EditProductPage = () => {
   );
 };
 
-export default EditProductPage;
+// ✅ Suspense wrapper
+export default function EditProductPage() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <EditProductContent />
+    </Suspense>
+  );
+}
