@@ -26,7 +26,10 @@ export async function POST(request) {
                 userId, 
                 address, 
                 items, 
-                amount: amount + Math.floor(amount * 0.2),
+                amount: amount + Math.floor(amount + 5000),
+                paymentStatus: "pending",
+                deliveryStatus: "pending",
+                status: "Order Placed",
                 date:Date.now() }
         })
 

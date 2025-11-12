@@ -1,6 +1,6 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
-import { assets, BagIcon, BoxIcon, CartIcon, DarkModeIcon, HomeIcon } from "@/assets/assets";
+import { assets, BagIcon, CartIcon, DarkModeIcon } from "@/assets/assets";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
@@ -21,23 +21,13 @@ const Navbar = () => {
       
       {/* ==== Logo ==== */}
       <Link href="/" className="flex items-center gap-2 cursor-pointer">
-        {theme === "dark" ? (
-          <Image
-            src={assets.darkLogo}
-            alt="Dark logo"
-            width={120}
-            height={40}
-            className="transition-transform duration-300 hover:scale-105"
-          />
-        ) : (
-          <Image
-            src={assets.lightLogo}
-            alt="Light logo"
-            width={120}
-            height={40}
-            className="transition-transform duration-300 hover:scale-105"
-          />
-        )}
+        <Image
+          src={theme === "dark" ? assets.darkLogo : assets.lightLogo}
+          alt="Logo"
+          width={120}
+          height={40}
+          className="transition-transform duration-300 hover:scale-105"
+        />
       </Link>
 
       {/* ==== Desktop Menu ==== */}
@@ -48,7 +38,7 @@ const Navbar = () => {
         <Link href="/contact" className="hover:text-purple-600 transition">Contact</Link>
         {isSeller && (
           <button
-            onClick={() => router.push("/seller")}
+            onClick={() => router.push("/admin")}
             className="text-sm border px-4 py-1.5 rounded-full hover:bg-purple-500 hover:text-white transition"
           >
             Seller Dashboard
@@ -58,24 +48,35 @@ const Navbar = () => {
 
       {/* ==== Right Side ==== */}
       <div className="flex items-center gap-4">
-        <Image
-          className="w-5 h-5 cursor-pointer hover:scale-110 transition"
-          src={assets.search_icon}
-          alt="search icon"
-        />
+        {/* Dark/Light mode toggle (search icon оронд) */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        >
+          <DarkModeIcon />
+        </button>
 
+        {/* User / Account */}
         {user ? (
-          <UserButton>
+          <UserButton afterSignOutUrl="/">
             <UserButton.MenuItems>
-              <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push("/cart")} />
-              <UserButton.Action label="My orders" labelIcon={<BagIcon />} onClick={() => router.push("/my-orders")} />
-              <UserButton.Action label="Dark/Light mode" labelIcon={<DarkModeIcon />} onClick={toggleTheme} />
+              <UserButton.Action
+                label="Cart"
+                labelIcon={<CartIcon />}
+                onClick={() => router.push("/cart")}
+              />
+              <UserButton.Action
+                label="My orders"
+                labelIcon={<BagIcon />}
+                onClick={() => router.push("/my-orders")}
+              />
+              {/* Theme toggle-г Clerk menu дотор давхар үлдээхийг хүсвэл энд үлдээж болно */}
             </UserButton.MenuItems>
           </UserButton>
         ) : (
           <button
             onClick={openSignIn}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border-blank hover:bg-purple-500 hover:text-white transition"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border hover:bg-purple-500 hover:text-white transition"
           >
             <Image src={assets.user_icon} alt="user icon" />
             Account

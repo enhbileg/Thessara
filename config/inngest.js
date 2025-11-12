@@ -85,3 +85,35 @@ export const createUserOrder = inngest.createFunction(
 
   }
 )
+// Төлбөр хийгдсэн үед
+export const onPaymentDone = inngest.createFunction(
+  { id: "on-payment-done" },
+  { event: "order/payment.done" },
+  async ({ event }) => {
+    console.log("💳 Payment done:", event.data.orderId);
+    // Email/SMS/Notification logic энд
+    return { ok: true };
+  }
+);
+
+// Хүргэлт эхэлсэн үед
+export const onOrderShipped = inngest.createFunction(
+  { id: "on-order-shipped" },
+  { event: "order/shipped" },
+  async ({ event }) => {
+    console.log("📦 Order shipped:", event.data.orderId);
+    // Warehouse notification logic энд
+    return { ok: true };
+  }
+);
+
+// Хүргэлт дууссан үед
+export const onOrderDelivered = inngest.createFunction(
+  { id: "on-order-delivered" },
+  { event: "order/delivery.done" },
+  async ({ event }) => {
+    console.log("✅ Order delivered:", event.data.orderId);
+    // Customer notification logic энд
+    return { ok: true };
+  }
+);

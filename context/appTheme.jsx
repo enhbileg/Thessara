@@ -1,52 +1,37 @@
-'use client';
-import { createContext, useState, useEffect, useContext } from "react";
+"use client";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState("light");
 
-  // Онцгой color state
-  const [specialClass, setSpecialClass] = useState({
-  bg: "bg-backBanner",
-  text: "text-specialText"
-});
-
-  // Theme-г localStorage-с авах
+  // localStorage‑оос theme сэргээх
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored) setTheme(stored);
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.className = savedTheme;
+    }
   }, []);
 
-  // Theme class-ийг document-д нэмэх/устгах
+  // theme өөрчлөгдөхөд хадгалах
   useEffect(() => {
-    if(theme === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
     localStorage.setItem("theme", theme);
+    document.documentElement.className = theme;
   }, [theme]);
 
-  // Theme toggle
-  const toggleTheme = () => setTheme(prev => prev === "light" ? "dark" : "light");
-
-  // Онцгой өнгө тохируулах function
-  const setSpecialColor = ({ bgLight, bgDark, textLight, textDark }) => {
-    setSpecialClass({
-      bg: `${bgLight} dark:${bgDark}`,
-      text: `${textLight} dark:${textDark}`
-    });
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
   return (
-    <ThemeContext.Provider value={{
-      theme,
-      toggleTheme,
-      specialClass,
-      setSpecialColor
-    }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-// Hook
-export const useTheme = () => useContext(ThemeContext);
+export function useTheme() {
+  return useContext(ThemeContext);
+}

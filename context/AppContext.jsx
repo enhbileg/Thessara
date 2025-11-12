@@ -123,6 +123,56 @@ export const AppContextProvider = (props) => {
     }
     return Math.floor(totalAmount * 100) / 100;
   };
+  const updateProduct = async (id, updatedData) => {
+  try {
+    const token = await getToken();
+    console.log("📝 Updating product:", id, updatedData);
+
+    const { data } = await axios.put(`/api/product/update?id=${id}`, updatedData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log("📩 Update response:", data);
+
+    if (data.success) {
+      toast.success("Product updated successfully");
+      // products state‑ийг шинэчилнэ
+      setProducts((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, ...updatedData } : p))
+      );
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    console.error("❌ Update error:", error);
+    toast.error(error.message);
+  }
+};
+
+const deleteProduct = async (id) => {
+  try {
+    const token = await getToken();
+    console.log("🗑️ Deleting product:", id);
+
+    const { data } = await axios.delete(`/api/product/delete?id=${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log("📩 Delete response:", data);
+
+    if (data.success) {
+      toast.success("Product deleted successfully");
+      // products state‑ээс устгана
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    console.error("❌ Delete error:", error);
+    toast.error(error.message);
+  }
+};
+
 
   useEffect(() => {
     fetchProductData();
@@ -151,6 +201,8 @@ export const AppContextProvider = (props) => {
     updateCartQuantity,
     getCartCount,
     getCartAmount,
+    updateProduct,   // ✅ шинэ нэмэлт
+  deleteProduct,   // ✅ шинэ нэмэлт
   };
 
   return (

@@ -1,13 +1,28 @@
 import { serve } from "inngest/next";
-import { createUserOrder, inngest, syncUserCreation, syncUserDeletion, syncUserUpdation } from "@/config/inngest";
+import {
+  createUserOrder,
+  inngest,
+  syncUserCreation,
+  syncUserDeletion,
+  syncUserUpdation,
+  onPaymentDone,
+  onOrderShipped,
+  onOrderDelivered
+} from "@/config/inngest";
 
-// Create an API that serves zero functions
+// Inngest API route
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
+    // ✅ User events
     syncUserCreation,
     syncUserUpdation,
     syncUserDeletion,
-    createUserOrder
+
+    // ✅ Order events
+    createUserOrder,
+    onPaymentDone,
+    onOrderShipped,
+    onOrderDelivered
   ],
 });

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
+        domains: ["img.clerk.com"], // Clerk images зөвшөөрөгдөнө
         remotePatterns: [
             {
                 protocol: 'https',
