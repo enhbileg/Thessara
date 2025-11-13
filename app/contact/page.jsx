@@ -17,7 +17,7 @@ export default function ContactPage() {
   const [messages, setMessages] = useState([]);
   const [waitingReply, setWaitingReply] = useState(false);
 
-  // Fetch history
+  // ✅ History fetch
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -25,8 +25,7 @@ export default function ContactPage() {
         const data = await res.json();
         if (res.ok && data.success) {
           setMessages(data.messages);
-          const hasPending = data.messages.some((m) => !m.reply);
-          setWaitingReply(hasPending);
+          setWaitingReply(data.messages.some((m) => !m.reply));
         }
       } catch (err) {
         console.error(err);
@@ -57,9 +56,11 @@ export default function ContactPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success("Message sent!");
-        setForm({ ...form, subject: "", message: "" });
+        // ✅ зөвхөн subject/message reset хийнэ
+        setForm((f) => ({ ...f, subject: "", message: "" }));
         setWaitingReply(true);
-        // refresh history
+
+        // ✅ History refresh
         const historyRes = await fetch("/api/contact/history");
         const historyData = await historyRes.json();
         if (historyRes.ok && historyData.success) {
@@ -106,6 +107,7 @@ export default function ContactPage() {
                   onChange={onChange}
                   placeholder="Your Name"
                   className="w-full border rounded px-3 py-2 bg-transparent"
+                  disabled
                 />
                 <input
                   type="email"
@@ -114,6 +116,7 @@ export default function ContactPage() {
                   onChange={onChange}
                   placeholder="Your Email"
                   className="w-full border rounded px-3 py-2 bg-transparent"
+                  disabled
                 />
                 <input
                   type="tel"
