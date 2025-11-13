@@ -7,6 +7,8 @@ import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
 import { useTheme } from "@/context/appTheme";
 import { FaGlobe } from "react-icons/fa"; // 🌐 Language toggle icon
+import { FaInfoCircle, FaEnvelope } from "react-icons/fa"; // ✅ React Icons
+
 
 const Navbar = () => {
   const { isSeller, router, user, language, setLanguage, translate } = useAppContext(); 
@@ -78,26 +80,38 @@ const Navbar = () => {
         {/* User / Account */}
         {user ? (
           <UserButton afterSignOutUrl="/">
-            <UserButton.MenuItems>
-              <UserButton.Action
-                label="Cart"
-                labelIcon={<CartIcon />}
-                onClick={() => router.push("/cart")}
-              />
-              <UserButton.Action
-                label="My orders"
-                labelIcon={<BagIcon />}
-                onClick={() => router.push("/my-orders")}
-              />
-              {isSeller && (
-                <UserButton.Action
-                  label="Admin"
-                  labelIcon={<DashboardIcon />}
-                  onClick={() => router.push("/admin")}
-                />
-              )}
-            </UserButton.MenuItems>
-          </UserButton>
+  <UserButton.MenuItems>
+    <UserButton.Action
+      label="Cart"
+      labelIcon={<CartIcon />}
+      onClick={() => router.push("/cart")}
+    />
+    <UserButton.Action
+      label="My orders"
+      labelIcon={<BagIcon />}
+      onClick={() => router.push("/my-orders")}
+    />
+    {/* ✅ About */}
+    <UserButton.Action
+      label="About"
+      labelIcon={<FaInfoCircle />}
+      onClick={() => router.push("/about")}
+    />
+    {/* ✅ Contact */}
+    <UserButton.Action
+      label="Contact"
+      labelIcon={<FaEnvelope />}
+      onClick={() => router.push("/contact")}
+    />
+    {isSeller && (
+      <UserButton.Action
+        label="Admin"
+        labelIcon={<DashboardIcon />}
+        onClick={() => router.push("/admin")}
+      />
+    )}
+  </UserButton.MenuItems>
+</UserButton>
         ) : (
           <button
             onClick={openSignIn}

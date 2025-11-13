@@ -1,8 +1,8 @@
 "use client";
 import { useAppContext } from "@/context/AppContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import Navbar from "@/components/Navbar"; // ✅ Navbar импортлоно
+import Navbar from "@/components/Navbar";
 
 export default function ContactPage() {
   const { user } = useAppContext();
@@ -14,8 +14,29 @@ export default function ContactPage() {
     message: "",
   });
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [waitingReply, setWaitingReply] = useState(false);
 
-  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  // Fetch history
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/contact/history");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setMessages(data.messages);
+          const hasPending = data.messages.some((m) => !m.reply);
+          setWaitingReply(hasPending);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchHistory();
+  }, []);
+
+  const onChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const sendMessage = async () => {
     if (!form.message.trim()) {
@@ -28,7 +49,7 @@ export default function ContactPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clerkId: user?.id, // ✅ Clerk ID дамжуулна
+          clerkId: user?.id,
           ...form,
         }),
       });
@@ -37,6 +58,13 @@ export default function ContactPage() {
       if (res.ok && data.success) {
         toast.success("Message sent!");
         setForm({ ...form, subject: "", message: "" });
+        setWaitingReply(true);
+        // refresh history
+        const historyRes = await fetch("/api/contact/history");
+        const historyData = await historyRes.json();
+        if (historyRes.ok && historyData.success) {
+          setMessages(historyData.messages);
+        }
       } else {
         toast.error(data.message || "Failed to send message");
       }
@@ -49,70 +77,82 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* ✅ Navbar харагдуулна */}
       <Navbar />
 
       <section className="max-w-5xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Contact Form */}
         <div className="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">
           <h1 className="text-2xl font-bold mb-4">Get in Touch</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            Fill out the form and we’ll respond as soon as possible.
-          </p>
 
-          <div className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={onChange}
-              placeholder="Your Name"
-              className="w-full border rounded px-3 py-2 bg-transparent"
-            />
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={onChange}
-              placeholder="Your Email"
-              className="w-full border rounded px-3 py-2 bg-transparent"
-            />
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={onChange}
-              placeholder="Your Phone Number"
-              className="w-full border rounded px-3 py-2 bg-transparent"
-            />
-            <input
-              type="text"
-              name="subject"
-              value={form.subject}
-              onChange={onChange}
-              placeholder="Subject"
-              className="w-full border rounded px-3 py-2 bg-transparent"
-            />
-            <textarea
-              name="message"
-              value={form.message}
-              onChange={onChange}
-              rows={5}
-              placeholder="Your Message"
-              className="w-full border rounded px-3 py-2 bg-transparent resize-y"
-            />
-          </div>
+          {waitingReply ? (
+            <div className="text-center text-gray-600 dark:text-gray-400">
+              <p className="mb-4">📩 Таны мессежийн хариуг хүлээж байна...</p>
+              {messages.some((m) => m.reply) && (
+                <button
+                  onClick={() => setWaitingReply(false)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                >
+                  ✏️ New Message
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={onChange}
+                  placeholder="Your Name"
+                  className="w-full border rounded px-3 py-2 bg-transparent"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={onChange}
+                  placeholder="Your Email"
+                  className="w-full border rounded px-3 py-2 bg-transparent"
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={onChange}
+                  placeholder="Your Phone Number"
+                  className="w-full border rounded px-3 py-2 bg-transparent"
+                />
+                <input
+                  type="text"
+                  name="subject"
+                  value={form.subject}
+                  onChange={onChange}
+                  placeholder="Subject"
+                  className="w-full border rounded px-3 py-2 bg-transparent"
+                />
+                <textarea
+                  name="message"
+                  value={form.message}
+                  onChange={onChange}
+                  rows={5}
+                  placeholder="Your Message"
+                  className="w-full border rounded px-3 py-2 bg-transparent resize-y"
+                />
+              </div>
 
-          <button
-            onClick={sendMessage}
-            disabled={loading}
-            className="mt-6 w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition disabled:opacity-60"
-          >
-            {loading ? "Sending..." : "Send Message"}
-          </button>
+              <button
+                onClick={sendMessage}
+                disabled={loading}
+                className="mt-6 w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition disabled:opacity-60"
+              >
+                {loading ? "Sending..." : "Send Message"}
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Company Info */}
+        {/* Company Info + History */}
         <div className="bg-gray-50 dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-6">
           <h2 className="text-xl font-bold mb-4">Contact Information</h2>
           <div className="flex items-center gap-3">
@@ -126,6 +166,35 @@ export default function ContactPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="font-medium">⏰ Hours:</span> Mon‑Fri: 9:00 AM – 6:00 PM
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">📜 Message History</h3>
+            {messages.length === 0 ? (
+              <p className="text-sm text-gray-500">No messages yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((m) => (
+                  <div
+                    key={m._id}
+                    className="border rounded p-3 bg-white dark:bg-gray-700"
+                  >
+                    <p><strong>Subject:</strong> {m.subject}</p>
+                    <p><strong>Message:</strong> {m.message}</p>
+                    <p className="text-sm text-gray-500">
+                      Sent: {new Date(m.createdAt).toLocaleString()}
+                    </p>
+                    {m.reply ? (
+                      <p className="mt-2 text-green-600">
+                        <strong>Reply:</strong> {m.reply}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-red-500">⏳ Awaiting reply...</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
