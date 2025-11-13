@@ -3,45 +3,39 @@ import React, { useState, useEffect, useRef } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
 
 const HeaderSlider = () => {
-  const sliderData = [
-    {
-      id: 1,
-      title: "Шинэ үеийн ухаалаг хэрэгслүүдийг эндээс!",
-      offer: "Thessara",
-      buttonText1: "Conruct us",
-      buttonText2: "Find more",
-      imgSrc: "https://res.cloudinary.com/dxqziib9u/image/upload/v1762758655/logo_ff4vgv.png",
-    },
-    {
-      id: 2,
-      title: "Шинэ загварын цагнуудыг эндээс!",
-      offer: "Цөөхөн тоогоор ирсэн шинэ коллекц",
-      buttonText1: "Shop Now",
-      buttonText2: "Explore Deals",
-      imgSrc: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835687/ohy6qzqyydkmwc4gnufc.png",
-    },
-    {
-      id: 3,
-      title: "Шинэ загварын цагнуудыг эндээс!",
-      offer: "Цөөхөн тоогоор ирсэн шинэ коллекц",
-      buttonText1: "Order Now",
-      buttonText2: "Learn More",
-      imgSrc: "https://res.cloudinary.com/dxqziib9u/image/upload/v1761835686/dwq77hvajopzujp8qybo.png",
-    },
-  ];
-
   const { router } = useAppContext();
+  const [sliderData, setSliderData] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // ✅ Settings API‑аас slider data авах
+  useEffect(() => {
+    const fetchSlider = async () => {
+      try {
+        const res = await fetch("/api/admin/settings");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setSliderData(data.settings.slider || []);
+        } else {
+          toast.error(data.message || "Failed to load slider");
+        }
+      } catch {
+        toast.error("Server error");
+      }
+    };
+    fetchSlider();
+  }, []);
 
   // Автомат slide
   useEffect(() => {
+    if (sliderData.length === 0) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % sliderData.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [sliderData.length]);
+  }, [sliderData]);
 
   // Swipe (утас)
   const startX = useRef(0);
@@ -68,6 +62,8 @@ const HeaderSlider = () => {
     setCurrentSlide((prev) => (prev + 1) % sliderData.length);
   };
 
+  if (sliderData.length === 0) return null;
+
   return (
     <div
       className="overflow-hidden relative w-full group"
@@ -81,7 +77,7 @@ const HeaderSlider = () => {
       >
         {sliderData.map((slide, index) => (
           <div
-            key={slide.id}
+            key={index}
             className="flex flex-col-reverse md:flex-row items-center justify-between bg-backBanner py-8 md:px-14 px-5 mt-6 rounded-xl min-w-full"
           >
             <div className="md:pl-8 mt-10 md:mt-0">

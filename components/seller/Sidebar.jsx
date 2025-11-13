@@ -16,6 +16,7 @@ const AdminSidebar = () => {
     { name: "Products", path: "/admin/products", icon: assets.product_list_icon },
     { name: "Orders", path: "/admin/orders", icon: assets.order_icon },
     { name: "contact", path: "/admin/contact", icon: assets.user_icon },
+    { name: "settings", path: "/admin/settings", icon: assets.user_icon },
   ];
 
   return (
