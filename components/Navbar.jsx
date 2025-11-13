@@ -6,15 +6,26 @@ import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
 import { useTheme } from "@/context/appTheme";
+import { FaGlobe } from "react-icons/fa"; // 🌐 Language toggle icon
 
 const Navbar = () => {
-  const { isSeller, router, user } = useAppContext();
+  const { isSeller, router, user, language, setLanguage, translate } = useAppContext(); 
   const { openSignIn } = useClerk();
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
+
+  // ✅ Language toggle function
+  const handleLanguageToggle = async () => {
+    const newLang = language === "mn" ? "en" : "mn";
+    setLanguage(newLang);
+
+    // Жишээ: API дуудалт (About page title орчуулах)
+    const translated = await translate("Манай тухай", newLang);
+    console.log("🌐 Translated sample:", translated);
+  };
 
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-gray-200 dark:border-gray-700 bg-navbar text-navbar shadow-sm">
@@ -48,12 +59,20 @@ const Navbar = () => {
 
       {/* ==== Right Side ==== */}
       <div className="flex items-center gap-4">
-        {/* Dark/Light mode toggle (search icon оронд) */}
+        {/* Dark/Light mode toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
         >
           <DarkModeIcon />
+        </button>
+
+        {/* 🌐 Language toggle */}
+        <button
+          onClick={handleLanguageToggle}
+          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        >
+          <FaGlobe />
         </button>
 
         {/* User / Account */}
@@ -70,16 +89,14 @@ const Navbar = () => {
                 labelIcon={<BagIcon />}
                 onClick={() => router.push("/my-orders")}
               />
-              {/* Theme toggle-г Clerk menu дотор давхар үлдээхийг хүсвэл энд үлдээж болно */}
               {isSeller && (
-              <UserButton.Action
-                label="Admin"
-                labelIcon={< DashboardIcon/>}
-                onClick={() => router.push("/admin")}
-              />
+                <UserButton.Action
+                  label="Admin"
+                  labelIcon={<DashboardIcon />}
+                  onClick={() => router.push("/admin")}
+                />
               )}
             </UserButton.MenuItems>
-            
           </UserButton>
         ) : (
           <button

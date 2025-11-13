@@ -14,15 +14,16 @@ export const useAppContext = () => {
 
 export const AppContextProvider = (props) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY;
-  const router = useRouter()
+  const router = useRouter();
 
-  const { user } = useUser()
-  const { getToken } = useAuth()
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);
   const [isSeller, setIsSeller] = useState(false);
   const [cartItems, setCartItems] = useState({});
+  const [language, setLanguage] = useState("mn");
 
   const fetchProductData = async () => {
     try {
@@ -32,11 +33,10 @@ export const AppContextProvider = (props) => {
       } else {
         toast.error(data.message);
       }
-    }
-    catch (error) {
+    } catch (error) {
       toast.error(error.message);
     }
-  }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -50,13 +50,13 @@ export const AppContextProvider = (props) => {
         },
       });
       if (data.success) {
-        setUserData(data.user)
-        setCartItems(data.user.cartItems)
+        setUserData(data.user);
+        setCartItems(data.user.cartItems);
       } else {
-        toast.error(data.message)
+        toast.error(data.message);
       }
     } catch (error) {
-        toast.error(error.message)
+      toast.error(error.message);
     }
   };
 
@@ -68,16 +68,16 @@ export const AppContextProvider = (props) => {
       cartData[itemId] = 1;
     }
     setCartItems(cartData);
-    
-    if (user){
+
+    if (user) {
       try {
         const token = await getToken();
-        await axios.post('/api/cart/update', { cartData }, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        await axios.post("/api/cart/update", { cartData }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Item added to cart");
       } catch (error) {
-        toast.error(error.message)
+        toast.error(error.message);
       }
     }
   };
@@ -90,15 +90,15 @@ export const AppContextProvider = (props) => {
       cartData[itemId] = quantity;
     }
     setCartItems(cartData);
-    if (user){
+    if (user) {
       try {
         const token = await getToken();
-        await axios.post('/api/cart/update', { cartData }, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        await axios.post("/api/cart/update", { cartData }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Cart updated successfully");
       } catch (error) {
-        toast.error(error.message)
+        toast.error(error.message);
       }
     }
   };
@@ -123,56 +123,65 @@ export const AppContextProvider = (props) => {
     }
     return Math.floor(totalAmount * 100) / 100;
   };
+
   const updateProduct = async (id, updatedData) => {
-  try {
-    const token = await getToken();
-    console.log("📝 Updating product:", id, updatedData);
+    try {
+      const token = await getToken();
+      const { data } = await axios.put(`/api/product/update?id=${id}`, updatedData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const { data } = await axios.put(`/api/product/update?id=${id}`, updatedData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    console.log("📩 Update response:", data);
-
-    if (data.success) {
-      toast.success("Product updated successfully");
-      // products state‑ийг шинэчилнэ
-      setProducts((prev) =>
-        prev.map((p) => (p._id === id ? { ...p, ...updatedData } : p))
-      );
-    } else {
-      toast.error(data.message);
+      if (data.success) {
+        toast.success("Product updated successfully");
+        setProducts((prev) =>
+          prev.map((p) => (p._id === id ? { ...p, ...updatedData } : p))
+        );
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
-  } catch (error) {
-    console.error("❌ Update error:", error);
-    toast.error(error.message);
-  }
-};
+  };
 
-const deleteProduct = async (id) => {
-  try {
-    const token = await getToken();
-    console.log("🗑️ Deleting product:", id);
+  const deleteProduct = async (id) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.delete(`/api/product/delete?id=${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const { data } = await axios.delete(`/api/product/delete?id=${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    console.log("📩 Delete response:", data);
-
-    if (data.success) {
-      toast.success("Product deleted successfully");
-      // products state‑ээс устгана
-      setProducts((prev) => prev.filter((p) => p._id !== id));
-    } else {
-      toast.error(data.message);
+      if (data.success) {
+        toast.success("Product deleted successfully");
+        setProducts((prev) => prev.filter((p) => p._id !== id));
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
-  } catch (error) {
-    console.error("❌ Delete error:", error);
-    toast.error(error.message);
-  }
-};
+  };
 
+  // ✅ Translate function (LibreTranslate ашиглаж)
+  const translate = async (text, targetLang = "en") => {
+    try {
+      const res = await fetch("https://libretranslate.com/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: text,
+          source: "auto",
+          target: targetLang,
+          format: "text",
+        }),
+      });
+      const data = await res.json();
+      return data.translatedText;
+    } catch (error) {
+      toast.error("Translation failed");
+      return text; // fallback
+    }
+  };
 
   useEffect(() => {
     fetchProductData();
@@ -201,12 +210,13 @@ const deleteProduct = async (id) => {
     updateCartQuantity,
     getCartCount,
     getCartAmount,
-    updateProduct,   // ✅ шинэ нэмэлт
-  deleteProduct,   // ✅ шинэ нэмэлт
+    updateProduct,
+    deleteProduct,
+    translate,
+    setLanguage // ✅ шинэ нэмэлт
   };
 
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );
 };
-
