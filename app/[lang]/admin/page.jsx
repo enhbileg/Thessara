@@ -1,176 +1,177 @@
-'use client'
-import React, { useState } from "react";
-import { assets } from "@/assets/assets";
-import Image from "next/image";
-import { useAppContext } from "@/context/AppContext";
-import axios from "axios";
-import toast from "react-hot-toast";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from "chart.js";
+import { Line, Pie } from "react-chartjs-2";
+import { useAppContext } from "@/context/AppContext"; 
+import { getDictionary } from "@/app/[lang]/dictionaries.js"; 
+import Footer from "@/components/seller/Footer"; 
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+const Dashboard = () => {
+  const { language } = useAppContext();
+  const [summary, setSummary] = useState({});
+  const [ordersByDate, setOrdersByDate] = useState([]);
+  const [deliveryStatus, setDeliveryStatus] = useState({});
+  const [paymentStatus, setPaymentStatus] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [dict, setDict] = useState({});
 
 
+  useEffect(() => {
+    (async () => {
+      const d = await getDictionary(language);
+      setDict(d);
+    })();
+  }, [language]);
 
-
-const AddProduct = () => {
-
-  const { getToken} = useAppContext()
-
-  const [files, setFiles] = useState([]);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Earphone');
-  const [price, setPrice] = useState('');
-  const [offerPrice, setOfferPrice] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData()
-
-    formData.append('name', name)
-    formData.append('description', description)
-    formData.append('category', category)
-    formData.append('price', price)
-    formData.append('offerPrice', offerPrice)
-
-    for (let i = 0; i < files.length; i++) {
-     formData.append('images', files[i])
-    }
-
-    try {
-      const token = await getToken()
-      const { data } = await axios.post('/api/product/add', formData, {headers: {Authorization: `Bearer ${token}`}})
-
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(`/${language}/api/admin/dashboard`);
+      const data = await res.json();
       if (data.success) {
-      toast.success(data.message)
-      setFiles([]);
-      setName('');
-      setDescription('');
-      setCategory('Earphone');
-      setPrice('');
-      setOfferPrice('');
-      } else {
-        toast.error(data.message)
+        setSummary(data.summary);
+        setOrdersByDate(data.ordersByDate);
+        setDeliveryStatus(data.deliveryStatus);
+        setPaymentStatus(data.paymentStatus);
       }
+      setLoading(false);
+    };
+    fetchData();
+  }, [language]);
 
-    } catch (error) {
-      toast.error(error.message)
-    }
-
-    
-  };
+  if (loading)
+    return (
+      <div className="p-6">
+        {dict.loadingDashboard || "Loading dashboard..."}
+      </div>
+    );
 
   return (
-    <div className="flex-1 min-h-screen flex flex-col justify-between">
-      <form onSubmit={handleSubmit} className="md:p-10 p-4 space-y-5 max-w-lg">
-        <div>
-          <p className="text-base font-medium">Product Image</p>
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-
-            {[...Array(4)].map((_, index) => (
-              <label key={index} htmlFor={`image${index}`}>
-                <input onChange={(e) => {
-                  const updatedFiles = [...files];
-                  updatedFiles[index] = e.target.files[0];
-                  setFiles(updatedFiles);
-                }} type="file" id={`image${index}`} hidden />
-                <Image
-                  key={index}
-                  className="max-w-24 cursor-pointer"
-                  src={files[index] ? URL.createObjectURL(files[index]) : assets.upload_area}
-                  alt=""
-                  width={100}
-                  height={100}
-                />
-              </label>
-            ))}
-
-          </div>
-        </div>
-        <div className="flex flex-col gap-1 max-w-md">
-          <label className="text-base font-medium" htmlFor="product-name">
-            Product Name
-          </label>
-          <input
-            id="product-name"
-            type="text"
-            placeholder="Type here"
-            className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-            onChange={(e) => setName(e.target.value)}
-            value={name}
-            required
+    <>
+      <div className="p-6 space-y-8 min-h-screen">
+        {/* Summary cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
+          <Card title={dict.orders || "Orders"} value={summary.orders} />
+          <Card
+            title={dict.sales || "Sales"}
+            value={`₮ ${Number(summary.sales || 0).toLocaleString("mn-MN")}`}
+          />
+          <Card title={dict.users || "Users"} value={summary.users} />
+          <Card title={dict.products || "Products"} value={summary.products} />
+          <Card
+            title={dict.totalStock || "Total Stock"}
+            value={summary.totalStock}
+          />
+          <Card
+            title={dict.uniqueCustomers || "Unique Customers"}
+            value={summary.uniqueCustomers}
+          />
+          <Card
+            title={dict.totalSold || "Total Sold"}
+            value={summary.totalSold}
           />
         </div>
-        <div className="flex flex-col gap-1 max-w-md">
-          <label
-            className="text-base font-medium"
-            htmlFor="product-description"
-          >
-            Product Description
-          </label>
-          <textarea
-            id="product-description"
-            rows={4}
-            className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none"
-            placeholder="Type here"
-            onChange={(e) => setDescription(e.target.value)}
-            value={description}
-            required
-          ></textarea>
-        </div>
-        <div className="flex items-center gap-5 flex-wrap">
-          <div className="flex flex-col gap-1 w-32">
-            <label className="text-base font-medium" htmlFor="category">
-              Category
-            </label>
-            <select
-              id="category"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setCategory(e.target.value)}
-              defaultValue={category}
-            >
-              <option value="Earphone">Earphone</option>
-              <option value="Headphone">Headphone</option>
-              <option value="Watch">Watch</option>
-              <option value="Smartphone">Smartphone</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Camera">Camera</option>
-              <option value="Accessories">Accessories</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1 w-32">
-            <label className="text-base font-medium" htmlFor="product-price">
-              Product Price
-            </label>
-            <input
-              id="product-price"
-              type="number"
-              placeholder="0"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setPrice(e.target.value)}
-              value={price}
-              required
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Orders Growth */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded shadow">
+            <h2 className="font-medium mb-2">
+              {dict.ordersGrowth || "Orders Growth (7 days)"}
+            </h2>
+            <Line
+              data={{
+                labels: ordersByDate.map((o) => o.date),
+                datasets: [
+                  {
+                    label: dict.orders || "Orders",
+                    data: ordersByDate.map((o) => o.count),
+                    borderColor: "#7c3aed",
+                    backgroundColor: "rgba(124,58,237,0.2)",
+                    tension: 0.3,
+                  },
+                  {
+                    label: dict.sales || "Sales",
+                    data: ordersByDate.map((o) => o.amount),
+                    borderColor: "#10b981",
+                    backgroundColor: "rgba(16,185,129,0.2)",
+                    tension: 0.3,
+                  },
+                ],
+              }}
+              options={{ responsive: true }}
             />
           </div>
-          <div className="flex flex-col gap-1 w-32">
-            <label className="text-base font-medium" htmlFor="offer-price">
-              Offer Price
-            </label>
-            <input
-              id="offer-price"
-              type="number"
-              placeholder="0"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
-              onChange={(e) => setOfferPrice(e.target.value)}
-              value={offerPrice}
-              required
+
+          {/* Delivery Status */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded shadow h-64">
+            <h2 className="font-medium mb-2">
+              {dict.deliveryStatus || "Delivery Status"}
+            </h2>
+            <Pie
+              data={{
+                labels: Object.keys(deliveryStatus),
+                datasets: [
+                  {
+                    data: Object.values(deliveryStatus),
+                    backgroundColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"],
+                  },
+                ],
+              }}
+              options={{ maintainAspectRatio: false, responsive: true }}
+            />
+          </div>
+
+          {/* Payment Status */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded shadow h-64">
+            <h2 className="font-medium mb-2">
+              {dict.paymentStatus || "Payment Status"}
+            </h2>
+            <Pie
+              data={{
+                labels: Object.keys(paymentStatus),
+                datasets: [
+                  {
+                    data: Object.values(paymentStatus),
+                    backgroundColor: ["#f59e0b", "#10b981", "#ef4444"], // Pending, Paid, Failed
+                  },
+                ],
+              }}
+              options={{ maintainAspectRatio: false, responsive: true }}
             />
           </div>
         </div>
-        <button type="submit" className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded">
-          ADD
-        </button>
-      </form>
-      {/* <Footer /> */}
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 
-export default AddProduct;
+const Card = ({ title, value }) => (
+  <div className="bg-white dark:bg-gray-900 p-4 rounded shadow text-center">
+    <p className="text-sm text-gray-500">{title}</p>
+    <p className="text-xl font-semibold">{value ?? 0}</p>
+  </div>
+);
+
+export default Dashboard;

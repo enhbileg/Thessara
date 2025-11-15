@@ -2,7 +2,8 @@
 module.exports = {
   darkMode: "class", // class-ээр dark mode
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",       // root app
+    "./app/*/**/*.{js,ts,jsx,tsx,mdx}",     // nested lang folders
     "./components/**/*.{js,ts,jsx,tsx}",
     "./pages/**/*.{js,ts,jsx,tsx}"
   ],

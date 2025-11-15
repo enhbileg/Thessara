@@ -69,7 +69,7 @@ const Navbar = () => {
 
         {isSeller && (
           <button
-            onClick={() => router.push(`/${language}/admin/dashboard`)}
+            onClick={() => router.push(`/${language}/admin`)}
             className="flex items-center justify-center rounded-full px-4 py-2 transition-colors duration-300 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-500 hover:text-white"
           >
             {dict.navDashboard || "Seller Dashboard"}
@@ -123,7 +123,7 @@ const Navbar = () => {
                 <UserButton.Action
                   label={dict.navAdmin || "Admin"}
                   labelIcon={<DashboardIcon />}
-                  onClick={() => router.push(`/${language}/admin/dashboard`)}
+                  onClick={() => router.push(`/${language}/admin`)}
                 />
               )}
             </UserButton.MenuItems>

@@ -48,7 +48,7 @@ const Footer = () => {
             alt="logo"
           />
           <p className="mt-6 text-sm text-gray-600 dark:text-gray-400">
-            {settings?.siteName || "QuickCart"} — {settings?.supportEmail || "support@quickcart.mn"}
+            {settings?.siteName || "Thessara"} — {settings?.supportEmail || "support@Thessara.mn"}
           </p>
         </div>
 
@@ -75,7 +75,7 @@ const Footer = () => {
             </h2>
             <div className="text-sm space-y-2">
               <p>{settings?.contactPhone || "+976 8888-0000"}</p>
-              <p>{settings?.supportEmail || "support@quickcart.mn"}</p>
+              <p>{settings?.supportEmail || "support@Thessara.mn"}</p>
               <p>{settings?.contactAddress || "Ulaanbaatar, Mongolia"}</p>
               <p>{settings?.workingHours || "Mon-Fri: 9:00 AM – 6:00 PM"}</p>
             </div>
