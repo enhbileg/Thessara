@@ -3,7 +3,8 @@ export default {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",       // ✅ root app
+    "./app/[lang]/**/*.{js,ts,jsx,tsx,mdx}" // ✅ lang доторх app structure
   ],
   theme: {
     extend: {
@@ -11,8 +12,8 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
-      gridTemplateColumns:{
-        'auto': 'repeat(auto-fit, minmax(200px, 1fr))'
+      gridTemplateColumns: {
+        auto: "repeat(auto-fit, minmax(200px, 1fr))",
       },
     },
   },
