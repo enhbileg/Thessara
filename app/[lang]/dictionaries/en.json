@@ -316,5 +316,7 @@
   "pleaseSelectAddress": "Please select an address",
 
   "WriteReviews": "Write your message...",
-  "reviews": "Rating"
+  "reviews": "Rating",
+
+  "Notes": "Notes"
 }

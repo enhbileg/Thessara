@@ -113,9 +113,10 @@ const OrderDetailContent = () => {
               <p>{order.address.fullName}</p>
               <p>{order.address.phoneNumber}</p>
               <p>
-                {order.address.area}, {order.address.city}, {order.address.state}
+                {order.address.city} хот, {order.address.district} дүүрэг, {order.address.state},-р хороо
               </p>
-              <p>Pincode: {order.address.pincode}</p>
+              <p>{order.address.compoundBuilding} байр, {order.address.apartment} тоот</p>
+              <p>{dict.Notes || "Notes"}: {order.address.notes}</p>
             </div>
           )}
         </div>
