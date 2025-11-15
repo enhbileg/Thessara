@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const SettingsSchema = new mongoose.Schema({
-  siteName: { type: String, default: "QuickCart" },
-  supportEmail: { type: String, default: "support@quickcart.mn" },
+  siteName: { type: String, default: "Thessara" },
+  supportEmail: { type: String, default: "support@thessara.mn" },
   preferredTheme: { type: String, enum: ["light", "dark"], default: "light" },
   notifications: { type: Boolean, default: true },
 

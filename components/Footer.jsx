@@ -1,11 +1,40 @@
-'use client';
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
-import { useTheme } from "@/context/appTheme"; // ← theme context импортлоно
+import { useTheme } from "@/context/appTheme";
+import { useAppContext } from "@/context/AppContext"; // ✅ хэл context
+import { getDictionary } from "@/app/[lang]/dictionaries.js"; // ✅ dictionary
 
 const Footer = () => {
-  const { theme } = useTheme(); // ← одоогийн theme-г авна
+  const { theme } = useTheme();
+  const { language } = useAppContext();
+  const [settings, setSettings] = useState(null);
+  const [dict, setDict] = useState({});
+
+  // ✅ Dictionary ачаалах
+  useEffect(() => {
+    (async () => {
+      const d = await getDictionary(language);
+      setDict(d);
+    })();
+  }, [language]);
+
+  // ✅ Settings fetch
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`/${language}/api/admin/settings`);
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setSettings(data.settings);
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    };
+    fetchSettings();
+  }, [language]);
 
   return (
     <footer className="transition-colors duration-300 bg-background dark:bg-dark-background text-text dark:text-dark-text">
@@ -15,26 +44,25 @@ const Footer = () => {
         <div className="w-4/5">
           <Image
             className="w-28 md:w-32 transition-all duration-300"
-            src={theme === "dark" ? assets.darkLogo : assets.lightLogo} // ← theme дагаж солигдоно
+            src={theme === "dark" ? assets.darkLogo : assets.lightLogo}
             alt="logo"
           />
           <p className="mt-6 text-sm text-gray-600 dark:text-gray-400">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book.
+            {settings?.siteName || "QuickCart"} — {settings?.supportEmail || "support@quickcart.mn"}
           </p>
         </div>
 
         {/* ✅ Company хэсэг */}
         <div className="w-1/2 flex items-center justify-start md:justify-center">
           <div>
-            <h2 className="font-medium text-gray-700 dark:text-gray-300 mb-5">Company</h2>
+            <h2 className="font-medium text-gray-700 dark:text-gray-300 mb-5">
+              {dict.company || "Company"}
+            </h2>
             <ul className="text-sm space-y-2">
-              <li><a className="hover:underline transition" href="/">Home</a></li>
-              <li><a className="hover:underline transition" href="#">About us</a></li>
-              <li><a className="hover:underline transition" href="#">Contact us</a></li>
-              <li><a className="hover:underline transition" href="#">Privacy policy</a></li>
+              <li><a className="hover:underline transition" href="/">{dict.home || "Home"}</a></li>
+              <li><a className="hover:underline transition" href="/about">{dict.aboutUs || "About us"}</a></li>
+              <li><a className="hover:underline transition" href="/contact">{dict.contactUs || "Contact us"}</a></li>
+              <li><a className="hover:underline transition" href="/privacy">{dict.privacyPolicy || "Privacy policy"}</a></li>
             </ul>
           </div>
         </div>
@@ -42,10 +70,14 @@ const Footer = () => {
         {/* ✅ Contact хэсэг */}
         <div className="w-1/2 flex items-start justify-start md:justify-center">
           <div>
-            <h2 className="font-medium text-gray-700 dark:text-gray-300 mb-5">Get in touch</h2>
+            <h2 className="font-medium text-gray-700 dark:text-gray-300 mb-5">
+              {dict.getInTouch || "Get in touch"}
+            </h2>
             <div className="text-sm space-y-2">
-              <p>+97685769918</p>
-              <p>enh.bom8@gmail.com</p>
+              <p>{settings?.contactPhone || "+976 8888-0000"}</p>
+              <p>{settings?.supportEmail || "support@quickcart.mn"}</p>
+              <p>{settings?.contactAddress || "Ulaanbaatar, Mongolia"}</p>
+              <p>{settings?.workingHours || "Mon-Fri: 9:00 AM – 6:00 PM"}</p>
             </div>
           </div>
         </div>
@@ -53,7 +85,7 @@ const Footer = () => {
 
       {/* ✅ Доорх copyright хэсэг */}
       <p className="py-4 text-center text-xs md:text-sm text-gray-600 dark:text-gray-400">
-        Copyright 2025 © Bilgee bn. All Right Reserved.
+        © {new Date().getFullYear()} {settings?.siteName || "Thessara"} — All Rights Reserved.
       </p>
     </footer>
   );

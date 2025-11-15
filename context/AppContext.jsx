@@ -1,33 +1,34 @@
 "use client";
-import { productsDummyData, userDummyData } from "@/assets/assets";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter , usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { getDictionary } from "@/app/[lang]/dictionaries"; // ✅ dictionary loader
 
-export const AppContext = createContext();
+export const AppContext = createContext(null);
 
-export const useAppContext = () => {
-  return useContext(AppContext);
-};
+export const useAppContext = () => useContext(AppContext);
 
-export const AppContextProvider = (props) => {
+export const AppContextProvider = ({ children }) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY;
   const router = useRouter();
-
+  const pathname = usePathname();
   const { user } = useUser();
   const { getToken } = useAuth();
 
   const [products, setProducts] = useState([]);
-  const [userData, setUserData] = useState(false);
+  const [userData, setUserData] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [cartItems, setCartItems] = useState({});
-  const [language, setLanguage] = useState("mn");
+  const initialLang = pathname.split("/")[1] || "mn";
+  const [language, setLanguage] = useState(initialLang); 
+  const [dictionary, setDictionary] = useState({});
 
+  // ✅ Product fetch
   const fetchProductData = async () => {
     try {
-      const { data } = await axios.get("/api/product/list");
+      const { data } = await axios.get(`/${language}/api/product/list`);
       if (data.success) {
         setProducts(data.products);
       } else {
@@ -38,20 +39,19 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  // ✅ User fetch
   const fetchUserData = async () => {
     try {
-      if (user.publicMetadata.role === "seller") {
+      if (user?.publicMetadata?.role === "seller") {
         setIsSeller(true);
       }
       const token = await getToken();
-      const { data } = await axios.get("/api/user/data", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const { data } = await axios.get(`/${language}/api/user/data`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (data.success) {
         setUserData(data.user);
-        setCartItems(data.user.cartItems);
+        setCartItems(data.user.cartItems || {});
       } else {
         toast.error(data.message);
       }
@@ -60,19 +60,23 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  const addToCart = async (itemId) => {
+  // ✅ Add to cart
+  const addToCart = async (itemId, stock) => {
     let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] += 1;
-    } else {
-      cartData[itemId] = 1;
+    const currentQty = cartData[itemId] || 0;
+
+    if (currentQty + 1 > stock) {
+      toast.error("Out of stock");
+      return;
     }
+
+    cartData[itemId] = currentQty + 1;
     setCartItems(cartData);
 
     if (user) {
       try {
         const token = await getToken();
-        await axios.post("/api/cart/update", { cartData }, {
+        await axios.post(`/${language}/api/cart/update`, { cartData }, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Item added to cart");
@@ -82,6 +86,7 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  // ✅ Update cart quantity
   const updateCartQuantity = async (itemId, quantity) => {
     let cartData = structuredClone(cartItems);
     if (quantity === 0) {
@@ -90,10 +95,11 @@ export const AppContextProvider = (props) => {
       cartData[itemId] = quantity;
     }
     setCartItems(cartData);
+
     if (user) {
       try {
         const token = await getToken();
-        await axios.post("/api/cart/update", { cartData }, {
+        await axios.post(`/${language}/api/cart/update`, { cartData }, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Cart updated successfully");
@@ -103,33 +109,32 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  // ✅ Cart count
   const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-      if (cartItems[items] > 0) {
-        totalCount += cartItems[items];
-      }
-    }
-    return totalCount;
+    return Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
   };
 
+  // ✅ Cart amount
   const getCartAmount = () => {
     let totalAmount = 0;
-    for (const items in cartItems) {
-      let itemInfo = products.find((product) => product._id === items);
-      if (cartItems[items] > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[items];
+    for (const id in cartItems) {
+      const itemInfo = products.find((p) => p._id === id);
+      if (itemInfo) {
+        totalAmount += itemInfo.offerPrice * cartItems[id];
       }
     }
     return Math.floor(totalAmount * 100) / 100;
   };
 
+  // ✅ Update product
   const updateProduct = async (id, updatedData) => {
     try {
       const token = await getToken();
-      const { data } = await axios.put(`/api/product/update?id=${id}`, updatedData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.put(
+        `/${language}/api/product/update?id=${id}`,
+        updatedData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       if (data.success) {
         toast.success("Product updated successfully");
@@ -144,12 +149,14 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  // ✅ Delete product
   const deleteProduct = async (id) => {
     try {
       const token = await getToken();
-      const { data } = await axios.delete(`/api/product/delete?id=${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.delete(
+        `/${language}/api/product/delete?id=${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       if (data.success) {
         toast.success("Product deleted successfully");
@@ -162,36 +169,48 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  // ✅ Translate function (LibreTranslate ашиглаж)
-  const translate = async (text, targetLang = "en") => {
-    try {
-      const res = await fetch("https://libretranslate.com/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          q: text,
-          source: "auto",
-          target: targetLang,
-          format: "text",
-        }),
-      });
-      const data = await res.json();
-      return data.translatedText;
-    } catch (error) {
-      toast.error("Translation failed");
-      return text; // fallback
-    }
+  // ✅ Translate function → dictionary ашиглаж
+  const translate = (key) => {
+    return dictionary[key] || key;
   };
 
+  // ✅ Dictionary ачаалах
+  useEffect(() => {
+    (async () => {
+      const dict = await getDictionary(language);
+      setDictionary(dict);
+    })();
+  }, [language]);
+
+   // ✅ Product fetch хэл солигдох бүрт
   useEffect(() => {
     fetchProductData();
-  }, []);
+  }, [language]);
 
+  // ✅ User fetch хэл болон user солигдох бүрт
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
-  }, [user]);
+  }, [user, language]);
+
+  const languages = ["mn", "en"];
+
+  const toggleLanguage = () => {
+    const currentIndex = languages.indexOf(language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    const newLang = languages[nextIndex];
+
+    setLanguage(newLang);
+
+    // ✅ URL‑ийн эхний segment‑ийг шинэ хэлээр солих
+    const segments = pathname.split("/");
+    segments[1] = newLang;
+    const newPath = segments.join("/");
+
+    router.push(newPath);
+  };
+
 
   const value = {
     user,
@@ -212,11 +231,13 @@ export const AppContextProvider = (props) => {
     getCartAmount,
     updateProduct,
     deleteProduct,
+    language,
+    setLanguage,
     translate,
-    setLanguage // ✅ шинэ нэмэлт
+    toggleLanguage,
   };
 
   return (
-    <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
+    <AppContext.Provider value={value}>{children}</AppContext.Provider>
   );
 };

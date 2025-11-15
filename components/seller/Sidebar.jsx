@@ -1,22 +1,41 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { assets } from "../../assets/assets";
-import Image from "next/image";
-import { FiX } from "react-icons/fi";
-import { useState } from "react";
+import {
+  FiX,
+  FiHome,
+  FiUsers,
+  FiBox,
+  FiShoppingCart,
+  FiMail,
+  FiSettings,
+} from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { useAppContext } from "@/context/AppContext"; // ✅ хэл context
+import { getDictionary } from "@/app/[lang]/dictionaries.js";
 
 const AdminSidebar = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { language } = useAppContext();
+  const [dict, setDict] = useState({});
 
+  // ✅ Dictionary ачаалах
+  useEffect(() => {
+    (async () => {
+      const d = await getDictionary(language);
+      setDict(d);
+    })();
+  }, [language]);
+
+  // ✅ Цэсний item‑ууд
   const menuItems = [
-    { name: "Dashboard", path: "/admin/dashboard", icon: assets.dashboard_light },
-    { name: "Users", path: "/admin/users", icon: assets.user_icon },
-    { name: "Products", path: "/admin/products", icon: assets.product_list_icon },
-    { name: "Orders", path: "/admin/orders", icon: assets.order_icon },
-    { name: "contact", path: "/admin/contact", icon: assets.user_icon },
-    { name: "settings", path: "/admin/settings", icon: assets.user_icon },
+    { name: dict.dashboard || "Dashboard", path: `/${language}/admin/dashboard`, icon: <FiHome className="w-6 h-6" /> },
+    { name: dict.users || "Users", path: `/${language}/admin/users`, icon: <FiUsers className="w-6 h-6" /> },
+    { name: dict.products || "Products", path: `/${language}/admin/products`, icon: <FiBox className="w-6 h-6" /> },
+    { name: dict.orders || "Orders", path: `/${language}/admin/orders`, icon: <FiShoppingCart className="w-6 h-6" /> },
+    { name: dict.contact || "Contact", path: `/${language}/admin/contact`, icon: <FiMail className="w-6 h-6" /> },
+    { name: dict.settings || "Settings", path: `/${language}/admin/settings`, icon: <FiSettings className="w-6 h-6" /> },
   ];
 
   return (
@@ -35,7 +54,7 @@ const AdminSidebar = () => {
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <span className="hidden group-hover:inline font-bold text-lg text-gray-800 dark:text-gray-200">
-            Admin Panel
+            {dict.adminPanel || "Admin Panel"}
           </span>
         </div>
 
@@ -47,16 +66,11 @@ const AdminSidebar = () => {
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors
                     ${isActive
-                      ? "bg-orange-100 text-orange-600 font-semibold"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      ? "bg-violet-200 text-violet-800 font-semibold"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-primary"
                     }`}
                 >
-                  <Image
-                    src={item.icon}
-                    alt={`${item.name.toLowerCase()}_icon`}
-                    className="w-6 h-6 flex-shrink-0"
-                  />
-                  {/* Title зөвхөн hover үед гарна */}
+                  {item.icon}
                   <span className="hidden group-hover:inline text-sm font-medium">
                     {item.name}
                   </span>
@@ -82,7 +96,7 @@ const AdminSidebar = () => {
             style={{ transform: open ? "translateX(0)" : "translateX(-100%)" }}
           >
             <div className="p-4 flex justify-between items-center border-b">
-              <span className="font-bold text-xl">Menu</span>
+              <span className="font-bold text-xl">{dict.menu || "Menu"}</span>
               <button
                 onClick={() => setOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300"
@@ -98,13 +112,14 @@ const AdminSidebar = () => {
                     key={item.name}
                     href={item.path}
                     onClick={() => setOpen(false)}
-                    className={`block p-2 rounded ${
+                    className={`flex items-center gap-3 p-2 rounded ${
                       isActive
-                        ? "bg-orange-100 text-orange-600 font-medium"
+                        ? "bg-violet-800 text-violet-300 font-medium"
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                   >
-                    {item.name}
+                    {item.icon}
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}

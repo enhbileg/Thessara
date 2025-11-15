@@ -6,7 +6,7 @@ import { useAppContext } from "@/context/AppContext";
 import toast from "react-hot-toast";
 
 const HeaderSlider = () => {
-  const { router } = useAppContext();
+  const { router, language } = useAppContext(); // ✅ хэл context
   const [sliderData, setSliderData] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -14,7 +14,7 @@ const HeaderSlider = () => {
   useEffect(() => {
     const fetchSlider = async () => {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch(`/${language}/api/admin/settings`); // ✅ хэлтэй path
         const data = await res.json();
         if (res.ok && data.success) {
           setSliderData(data.settings.slider || []);
@@ -26,7 +26,7 @@ const HeaderSlider = () => {
       }
     };
     fetchSlider();
-  }, []);
+  }, [language]);
 
   // Автомат slide
   useEffect(() => {
@@ -87,13 +87,13 @@ const HeaderSlider = () => {
               </h1>
               <div className="flex items-center mt-4 md:mt-6 ">
                 <button
-                  onClick={() => router.push("/all-products")}
+                  onClick={() => router.push(`/${language}/all-products`)} // ✅ хэлтэй path
                   className="md:px-10 px-7 md:py-2.5 py-2 bg-button rounded-full text-specialText font-medium"
                 >
                   {slide.buttonText1}
                 </button>
                 <button
-                  onClick={() => router.push("/all-products")}
+                  onClick={() => router.push(`/${language}/all-products`)} // ✅ хэлтэй path
                   className="group flex items-center gap-2 px-6 py-2.5 font-medium"
                 >
                   {slide.buttonText2}
@@ -112,7 +112,7 @@ const HeaderSlider = () => {
                 width={300}
                 height={300}
                 className="object-contain cursor-pointer md:w-72 w-48"
-                onClick={() => router.push("/all-products")}
+                onClick={() => router.push(`/${language}/all-products`)} // ✅ хэлтэй path
               />
             </div>
           </div>

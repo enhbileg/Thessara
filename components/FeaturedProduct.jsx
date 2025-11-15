@@ -3,16 +3,28 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
 import { useRouter } from "next/navigation";
+import { useAppContext } from "@/context/AppContext"; // ✅ хэл context
+import { getDictionary } from "@/app/[lang]/dictionaries.js"; // ✅ dictionary
 
 const FeaturedProduct = () => {
   const [products, setProducts] = useState([]);
   const [featured, setFeatured] = useState([]);
+  const { language } = useAppContext();
+  const [dict, setDict] = useState({});
+
+  // ✅ Dictionary ачаалах
+  useEffect(() => {
+    (async () => {
+      const d = await getDictionary(language);
+      setDict(d);
+    })();
+  }, [language]);
 
   // ✅ Settings API‑аас featuredProducts авах
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch(`/${language}/api/admin/settings`);
         const data = await res.json();
         if (res.ok && data.success) {
           setFeatured(data.settings.featuredProducts || []);
@@ -22,13 +34,13 @@ const FeaturedProduct = () => {
       }
     };
     fetchSettings();
-  }, []);
+  }, [language]);
 
   // ✅ Products API‑аас бүх бараа авах
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/product/list");
+        const res = await fetch(`/${language}/api/product/list`);
         const data = await res.json();
         if (data.success) setProducts(data.products || []);
       } catch (e) {
@@ -36,7 +48,7 @@ const FeaturedProduct = () => {
       }
     };
     fetchProducts();
-  }, []);
+  }, [language]);
 
   // ✅ Settings.featuredProducts доторх id‑г ашиглаж products шүүх
   const selectedProducts = products.filter((p) =>
@@ -46,7 +58,9 @@ const FeaturedProduct = () => {
   return (
     <div className="mt-14">
       <div className="flex flex-col items-center">
-        <p className="text-3xl font-medium">Featured Products</p>
+        <p className="text-3xl font-medium">
+          {dict.featuredProducts || "Featured Products"}
+        </p>
         <div className="w-28 h-0.5 bg-button mt-2"></div>
       </div>
 
@@ -54,7 +68,7 @@ const FeaturedProduct = () => {
         {/* Mobile */}
         <div className="grid md:hidden grid-cols-1 gap-8">
           {selectedProducts.map((p) => (
-            <Card key={p._id} product={p} mobile />
+            <Card key={p._id} product={p} mobile dict={dict} />
           ))}
         </div>
 
@@ -76,7 +90,7 @@ const FeaturedProduct = () => {
             }`}
           >
             {selectedProducts.slice(0, 4).map((p) => (
-              <Card key={p._id} product={p} />
+              <Card key={p._id} product={p} dict={dict} />
             ))}
           </div>
         </div>
@@ -85,7 +99,7 @@ const FeaturedProduct = () => {
   );
 };
 
-const Card = ({ product, mobile }) => {
+const Card = ({ product, mobile, dict }) => {
   const { _id, name, offerPrice, image } = product || {};
   const src = Array.isArray(image) ? image[0] : image;
   const [open, setOpen] = useState(false);
@@ -113,9 +127,9 @@ const Card = ({ product, mobile }) => {
           ${
             mobile
               ? open
-                ? "bottom-[40%]" // ✅ утсан дээр click → дээшилнэ
+                ? "bottom-[40%]"
                 : "bottom-10"
-              : "bottom-10 group-hover:bottom-[40%]" // ✅ desktop дээр hover → дээшилнэ
+              : "bottom-10 group-hover:bottom-[40%]"
           }
         `}
       >
@@ -141,11 +155,11 @@ const Card = ({ product, mobile }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/product/${_id}`);
+              router.push(`/${language}/product/${_id}`);
             }}
             className="flex items-center gap-1.5 bg-button px-4 py-2 rounded transition-transform duration-300 hover:scale-105"
           >
-            Buy now
+            {dict.buyNow || "Buy now"}
             <Image
               className="h-3 w-3"
               src={assets.redirect_icon}

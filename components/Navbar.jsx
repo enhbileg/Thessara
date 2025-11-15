@@ -6,34 +6,39 @@ import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { useClerk, UserButton } from "@clerk/nextjs";
 import { useTheme } from "@/context/appTheme";
-import { FaGlobe } from "react-icons/fa"; // 🌐 Language toggle icon
-import { FaInfoCircle, FaEnvelope } from "react-icons/fa"; // ✅ React Icons
-
+import { FaGlobe, FaInfoCircle, FaEnvelope } from "react-icons/fa";
+import { usePathname } from "next/navigation";
+import { getDictionary } from "@/app/[lang]/dictionaries.js";
 
 const Navbar = () => {
-  const { isSeller, router, user, language, setLanguage, translate } = useAppContext(); 
+  const pathname = usePathname();
+  const { isSeller, router, user, language, toggleLanguage } = useAppContext();
   const { openSignIn } = useClerk();
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [dict, setDict] = useState({});
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    (async () => {
+      const d = await getDictionary(language);
+      setDict(d);
+    })();
+  }, [language]);
+
   if (!mounted) return null;
 
-  // ✅ Language toggle function
-  const handleLanguageToggle = async () => {
-    const newLang = language === "mn" ? "en" : "mn";
-    setLanguage(newLang);
-
-    // Жишээ: API дуудалт (About page title орчуулах)
-    const translated = await translate("Манай тухай", newLang);
-    console.log("🌐 Translated sample:", translated);
-  };
+  const navItems = [
+    { href: `/${language}`, label: dict.navHome || "Home" },
+    { href: `/${language}/all-products`, label: dict.navShop || "Shop" },
+    { href: `/${language}/about`, label: dict.navAbout || "About" },
+    { href: `/${language}/contact`, label: dict.navContact || "Contact" },
+  ];
 
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-gray-200 dark:border-gray-700 bg-navbar text-navbar shadow-sm">
-      
+    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-4 border-b border-gray-200 dark:border-gray-700 bg-navbar shadow-sm">
       {/* ==== Logo ==== */}
-      <Link href="/" className="flex items-center gap-2 cursor-pointer">
+      <Link href={`/${language}`} className="flex items-center gap-2 cursor-pointer">
         <Image
           src={theme === "dark" ? assets.darkLogo : assets.lightLogo}
           alt="Logo"
@@ -43,18 +48,31 @@ const Navbar = () => {
         />
       </Link>
 
-      {/* ==== Desktop Menu ==== */}
-      <div className="hidden md:flex items-center gap-6 font-medium">
-        <Link href="/" className="hover:text-purple-600 transition">Home</Link>
-        <Link href="/all-products" className="hover:text-purple-600 transition">Shop</Link>
-        <Link href="/about" className="hover:text-purple-600 transition">About Us</Link>
-        <Link href="/contact" className="hover:text-purple-600 transition">Contact</Link>
+      {/* ==== Capsule Menu ==== */}
+      <div className="hidden md:flex items-center gap-[1vw] font-medium">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center justify-center rounded-full px-4 py-2 transition-colors duration-300
+                ${isActive
+                  ? "bg-purple-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}
+                hover:bg-purple-500 hover:text-white`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+
         {isSeller && (
           <button
-            onClick={() => router.push("/admin")}
-            className="text-sm border px-4 py-1.5 rounded-full hover:bg-purple-500 hover:text-white transition"
+            onClick={() => router.push(`/${language}/admin/dashboard`)}
+            className="flex items-center justify-center rounded-full px-4 py-2 transition-colors duration-300 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-500 hover:text-white"
           >
-            Seller Dashboard
+            {dict.navDashboard || "Seller Dashboard"}
           </button>
         )}
       </div>
@@ -71,7 +89,7 @@ const Navbar = () => {
 
         {/* 🌐 Language toggle */}
         <button
-          onClick={handleLanguageToggle}
+          onClick={toggleLanguage}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
         >
           <FaGlobe />
@@ -79,46 +97,44 @@ const Navbar = () => {
 
         {/* User / Account */}
         {user ? (
-          <UserButton afterSignOutUrl="/">
-  <UserButton.MenuItems>
-    <UserButton.Action
-      label="Cart"
-      labelIcon={<CartIcon />}
-      onClick={() => router.push("/cart")}
-    />
-    <UserButton.Action
-      label="My orders"
-      labelIcon={<BagIcon />}
-      onClick={() => router.push("/my-orders")}
-    />
-    {/* ✅ About */}
-    <UserButton.Action
-      label="About"
-      labelIcon={<FaInfoCircle />}
-      onClick={() => router.push("/about")}
-    />
-    {/* ✅ Contact */}
-    <UserButton.Action
-      label="Contact"
-      labelIcon={<FaEnvelope />}
-      onClick={() => router.push("/contact")}
-    />
-    {isSeller && (
-      <UserButton.Action
-        label="Admin"
-        labelIcon={<DashboardIcon />}
-        onClick={() => router.push("/admin")}
-      />
-    )}
-  </UserButton.MenuItems>
-</UserButton>
+          <UserButton afterSignOutUrl={`/${language}`}>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label={dict.navCart || "Cart"}
+                labelIcon={<CartIcon />}
+                onClick={() => router.push(`/${language}/cart`)}
+              />
+              <UserButton.Action
+                label={dict.navOrders || "My orders"}
+                labelIcon={<BagIcon />}
+                onClick={() => router.push(`/${language}/my-orders`)}
+              />
+              <UserButton.Action
+                label={dict.navAbout || "About"}
+                labelIcon={<FaInfoCircle />}
+                onClick={() => router.push(`/${language}/about`)}
+              />
+              <UserButton.Action
+                label={dict.navContact || "Contact"}
+                labelIcon={<FaEnvelope />}
+                onClick={() => router.push(`/${language}/contact`)}
+              />
+              {isSeller && (
+                <UserButton.Action
+                  label={dict.navAdmin || "Admin"}
+                  labelIcon={<DashboardIcon />}
+                  onClick={() => router.push(`/${language}/admin/dashboard`)}
+                />
+              )}
+            </UserButton.MenuItems>
+          </UserButton>
         ) : (
           <button
             onClick={openSignIn}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border hover:bg-purple-500 hover:text-white transition"
           >
             <Image src={assets.user_icon} alt="user icon" />
-            Account
+            {dict.navAccount || "Account"}
           </button>
         )}
       </div>
