@@ -110,13 +110,11 @@ const OrderDetailContent = () => {
               <h4 className="font-semibold mb-1">
                 {dict.shippingAddress || "Shipping Address"}
               </h4>
-              <p>{order.address.fullName}</p>
-              <p>{order.address.phoneNumber}</p>
+              <p><b>Нэр: </b>{order.address.fullName}</p>
+              <p><b>Утасны дугаар: </b>{order.address.phoneNumber}</p>
               <p>
-                {order.address.city} хот, {order.address.district} дүүрэг, {order.address.state},-р хороо
-              </p>
-              <p>{order.address.compoundBuilding} байр, {order.address.apartment} тоот</p>
-              <p>{dict.Notes || "Notes"}: {order.address.notes}</p>
+               <b>Хаяг: </b>{order.address.city} хот, {order.address.district} дүүрэг, {order.address.state}-р хороо, {order.address.compoundBuilding} байр, {order.address.apartment} тоот</p>
+              <p><b>{dict.Notes || "Notes"}: </b>{order.address.notes}</p>
             </div>
           )}
         </div>
